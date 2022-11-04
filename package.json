@@ -1,0 +1,63 @@
+{
+  "name": "swipe-tool",
+  "version": "1.0.0",
+  "description": "A VC Map plugin to swipe split views.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "prepublishOnly": "vcmplugin build",
+    "build": "vcmplugin build",
+    "pack": "vcmplugin pack",
+    "start": "vcmplugin serve",
+    "preview": "vcmplugin preview",
+    "buildStagingApp": "vcmplugin buildStagingApp",
+    "lint": "eslint \"{src,tests}/**/*.{js,vue}\"",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "coverage:gitlab": "vitest run --coverage --reporter junit --outputFile test-report.xml"
+  },
+  "author": "VCS <support@vc.systems>",
+  "license": "MIT",
+  "keywords": [
+    "vcmap",
+    "plugin"
+  ],
+  "files": [
+    "src/",
+    "dist/",
+    "plugin-assets/",
+    "LICENSE.md",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./src/index.js",
+    "./dist": "./dist/index.js"
+  },
+  "eslintIgnore": [
+    "node_modules"
+  ],
+  "eslintConfig": {
+    "root": true,
+    "extends": "@vcsuite/eslint-config/vue"
+  },
+  "dependencies": {
+    "@vcsuite/check": "^1.1.2",
+    "@vcsuite/parsers": "^1.0.1"
+  },
+  "peerDependencies": {
+    "@vcmap/core": "~5.0.0-rc.23",
+    "@vcmap/cesium": "~1.97.1",
+    "@vcmap/ui": "^5.0.0-rc.15",
+    "@vitest/coverage-c8": "^0.24.5",
+    "jest-canvas-mock": "^2.4.0",
+    "jsdom": "^20.0.2",
+    "vite": "^3.2.2",
+    "vitest": "^0.24.5",
+    "vue": "~2.7.3",
+    "vuetify": "~2.6.7"
+  },
+  "devDependencies": {
+    "@vcmap/plugin-cli": "^2.0.11",
+    "@vcsuite/eslint-config": "^2.1.1"
+  }
+}
