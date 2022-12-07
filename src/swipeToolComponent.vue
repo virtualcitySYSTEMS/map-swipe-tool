@@ -1,9 +1,8 @@
 <template>
   <div>
     <VcsFormSection
-      v-for="({id, items, title }) in trees"
-      :key="id"
-      :title="`${title} (left | right)`"
+      :title="`${$t('swipeTool.layers')}`"
+      :title-actions="titleActions"
       help-text="swipeTool.help"
     >
       <template #help>
@@ -17,9 +16,13 @@
       </template>
       <template #default>
         <VcsTreeview
-          :items="items"
+          v-if="tree.length > 0"
+          :items="tree"
           item-children="visibleChildren"
         />
+        <p v-else class="ma-2">
+          {{ $t('swipeTool.emptyTree') }}
+        </p>
       </template>
     </VcsFormSection>
   </div>
@@ -81,79 +84,38 @@
 }
 </style>
 <script>
-  import { inject, ref } from 'vue';
+  import { computed, inject, ref } from 'vue';
   import { VIcon } from 'vuetify/lib';
   import { VcsFormSection, VcsTreeview } from '@vcmap/ui';
 
-  /**
-   * @param {import("@vcmap/ui").LayerContentTreeItem} layerItem
-   * @returns {import("@vcmap/ui").VcsAction}
-   */
-  function createSplitActions(layerItem) {
-    const splitState = ref(0);
-
-    return [
-      {
-        name: `split-${layerItem.name}-right`,
-        icon: '$vcsCheckbox',
-        title: 'swipeTool.splitRight',
-        active: false,
-        callback() {
-          splitState.value -= 1;
-          this.icon = '$vcsCheckboxChecked';
-        },
-      },
-      {
-        name: `split-${layerItem.name}-left`,
-        icon: '$vcsCheckboxChecked',
-        title: 'swipeTool.splitLeft',
-        active: false,
-        callback() {
-          splitState.value -= 1;
-          this.icon = '$vcsCheckbox';
-        },
-      },
-    ];
-  }
-
-  /**
-   * deriving swipeTool tree from content tree
-   * // TODO better way of getting items. items of splittable layers need to be filtered
-   * @param {Array<TreeViewItem>} items
-   * @returns {Array<TreeViewItem>}
-   */
-  export function getSwipeTreeItems(items) {
-    return items.map((item) => {
-      const { ...swipeItem } = { ...item };
-      swipeItem.clickable = false;
-      swipeItem.actions = createSplitActions(item);
-      swipeItem.children = getSwipeTreeItems(swipeItem.children);
-      swipeItem.visibleChildren = getSwipeTreeItems(swipeItem.visibleChildren);
-      return swipeItem;
-    });
-  }
-
   export default {
     name: 'SwipeTool',
+    props: {
+      titleActions: {
+        type: Array,
+        default: () => [],
+      },
+    },
     components: {
       VcsFormSection,
       VcsTreeview,
       VIcon,
     },
-    setup() {
+    setup(props) {
       const app = inject('vcsApp');
+      const plugin = app.plugins.getByKey('swipe-tool');
+      if (!props.titleActions[0].active) {
+        props.titleActions[0].callback();
+      }
 
-      const { subTreeIds } = app.contentTree;
-      const trees = subTreeIds.map(id => ({
-        id,
-        items: getSwipeTreeItems(app.contentTree.getComputedVisibleTree(id).value),
-        // eslint-disable-next-line no-underscore-dangle
-        title: app.contentTree._subTreeViewItems.value.get(id).title,
-      }));
+      const layerNames = ref(plugin.swipeTool.layerNames);
+      const tree = computed(() => {
+        return plugin.swipeTool.getSwipeTree(layerNames.value);
+      });
 
       return {
-        subTreeIds,
-        trees,
+        layerNames,
+        tree,
       };
     },
   };

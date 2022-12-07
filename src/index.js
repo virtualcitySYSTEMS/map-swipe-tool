@@ -1,84 +1,10 @@
-import { createToggleAction, ToolboxType } from '@vcmap/ui';
 import { version, name } from '../package.json';
-import { createSwipeSession } from './swipeTool.js';
-import SwipeTool from './swipeTool.vue';
-import swipeToolHeader from './swipeToolHeader.vue';
-
-/**
- * @typedef {Object} SwipeToolOptions
- * @property {SwipeToolLayer>|undefined} layers - the layers to activate, with a given swipe direction // XXX replace by layer property swipe???
- * @property {boolean} [noUi=false] - only provide toggle capabilities
- * @property {boolean} [hideSwipeElement=false] - hide the swipe element
- * @property {number|undefined} splitPosition - the position between 0 and 1 to place the split at
- * @property {Object<string, string>|undefined} swipeElementTitles - an object with "left" and/or "right" keys representing string titles to be placed either side of the swipe element
- * @api
- */
+import SwipeTool from './swipeTool.js';
 
 /**
  * @typedef {Object} PluginState
  * @property {any} prop
  */
-
-/** @type {SwipeSession|null} */
-let session = null;
-
-/**
- * @param {VcsUiApp} app
- * @param {SwipeToolOptions} options
- */
-export function setupSwipeTool(app, options) {
-  let toggleAction;
-  if (!options.noUi) {
-    const windowComponent = {
-      id: name,
-      component: SwipeTool,
-      headerComponent: swipeToolHeader,
-      state: {
-        headerTitle: 'swipeTool.title',
-      },
-    };
-    toggleAction = createToggleAction(
-      {
-        name,
-        icon: '$vcsSplitView',
-      },
-      windowComponent,
-      app.windowManager,
-      name,
-    );
-  }
-
-  const action = {
-    name,
-    title: 'swipeTool.title',
-    icon: '$vcsSplitView',
-    active: false,
-    callback() {
-      toggleAction?.action.callback();
-      if (session) {
-        session.stop();
-        this.title = 'swipeTool.activateToolTitle';
-      } else {
-        session = createSwipeSession(app, options);
-        session.stopped.addEventListener(() => {
-          this.active = false;
-          session = null;
-        });
-        this.active = true;
-        this.title = 'swipeTool.deactivateToolTitle';
-      }
-    },
-  };
-
-  app.toolboxManager.add(
-    {
-      id: name,
-      type: ToolboxType.SINGLE,
-      action,
-    },
-    name,
-  );
-}
 
 /**
  * @param {SwipeToolOptions} config - the configuration of this plugin instance, passed in from the app.
@@ -86,26 +12,36 @@ export function setupSwipeTool(app, options) {
  * @template {Object} SplitViewOptions
  */
 export default function splitView(config) {
+  /**
+   * @type {SwipeTool}
+   */
+  let swipeTool;
+
   return {
     get name() { return name; },
     get version() { return version; },
+    get swipeTool() { return swipeTool; },
     /**
-     * @param {import("@vcmap/ui").VcsUiApp} vcsUiApp
+     * @param {import("@vcmap/ui").VcsUiApp} app
      * @param {PluginState=} state
      * @returns {Promise<void>}
      */
-    initialize: async (vcsUiApp, state) => {
-      // eslint-disable-next-line no-console
-      console.log('Called before loading the rest of the current context. Passed in the containing Vcs UI App ', vcsUiApp, state);
+    initialize: async (app, state) => {
+      swipeTool = new SwipeTool(app, config);
+      if (state?.active) {
+        swipeTool.activate();
+      }
+      // if (state.layers) {
+      //   swipeTool.setState();
+      // }
     },
     /**
      * @param {import("@vcmap/ui").VcsUiApp} app
      * @returns {Promise<void>}
      */
-    onVcsAppMounted: async (app) => {
-      // setupSwipeTool(app, { ...defaultConfig, ...config });
-      setupSwipeTool(app, config);
-    },
+    // onVcsAppMounted: async (app) => {
+    //
+    // },
     /**
      * @returns {Promise<T>}
      */
@@ -121,7 +57,10 @@ export default function splitView(config) {
     getState: async (forUrl) => {
       // eslint-disable-next-line no-console
       console.log(forUrl);
-      return {};
+      return {
+        active: swipeTool.active,
+        layers: swipeTool.layers,
+      };
     },
     i18n: {
       en: {
@@ -129,13 +68,34 @@ export default function splitView(config) {
           title: 'Swipe Tool',
           activateToolTitle: 'Swipe Tool aktivieren',
           deactivateToolTitle: 'Swipe Tool deaktivieren',
+          hideLeft: 'Hide layer to the left',
+          hideRight: 'Hide layer to the right',
+          showLeft: 'Show layer to the left',
+          showRight: 'Show layer to the right',
+          layers: 'Layers (L|R)',
+          emptyTree: 'Activate Swipe Tool to show available layers to be split.',
+          help: {
+            general: 'SwipeTool of VC Map allows to compare two different states.',
+            toggleHeader: 'Toggle on and off',
+            toggle: 'Durch Klicken auf "Splitten Werkzeug aktivieren" bzw. "Splitten Werkzeug deaktivieren" lässt sich das Werkzeug aktivieren und nach der Bearbeitung deaktivieren.',
+            swipeHeader: 'Split View Controler',
+            swipe: 'Clicking on button "Split View Controler" a seamless transition between both views can be created.',
+            selectHeader: 'Select Layer',
+            select: 'You can decide for each layer individually whether the layer should be shown on the left, on the right, on both sides or not at all.',
+          },
         },
       },
       de: {
         swipeTool: {
           title: 'Swipe Tool',
-          activateToolTitle: 'Activate Swipe Tool',
-          deactivateToolTitle: 'Deactivate Swipe Tool',
+          activateToolTitle: 'Swipe Tool aktivieren',
+          deactivateToolTitle: 'Swipe Tool deaktivieren',
+          hideLeft: 'Ebene links verstecken',
+          hideRight: 'Ebene rechts verstecken',
+          showLeft: 'Ebene links anzeigen',
+          showRight: 'Ebene rechts anzeigen',
+          layers: 'Ebenen (L|R)',
+          emptyTree: 'Aktivieren Sie das Swipe Tool um die verfügbaren Split Layer anzuzeigen.',
           help: {
             general: 'Das Splitten Werkzeug der VC Map ermöglicht den Vergleich zwischen zwei Zuständen.',
             toggleHeader: 'Ein- und Ausschalten',
@@ -143,15 +103,15 @@ export default function splitView(config) {
             swipeHeader: 'Split View Controler',
             swipe: 'Durch Klicken auf den Button "Split View Controler ausblenden" lässt sich ein nahtloser Übergang zwischen beiden Ansichten herstellen.',
             selectHeader: 'Layer selektieren',
-            select: 'Sowohl die verfügbaren "Basislayer" als auch die verschiedenen "3D Objektlayer" befinden sich in der Legende und lassen sich durch einen Klick auf "L" oder "R" auf der entsprechenden linken oder rechten Seite einblenden.',
+            select: 'Sie können für jede Ebene einzelnen entscheiden, ob der Layer links, rechts, auf beiden Seiten oder gar nicht gezeigt werden soll.',
           },
         },
       },
     },
-    destroy() {
-      if (session) {
-        session.stop();
-        session = null;
+    destroy: () => {
+      if (swipeTool) {
+        swipeTool.destroy();
+        swipeTool = null;
       }
     },
   };

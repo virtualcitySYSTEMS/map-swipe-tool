@@ -42,11 +42,12 @@
   },
   "dependencies": {
     "@vcsuite/check": "^1.1.2",
+    "@vcsuite/logger": "^1.0.1",
     "@vcsuite/parsers": "^1.0.1"
   },
   "peerDependencies": {
-    "@vcmap/core": "~5.0.0-rc.23",
     "@vcmap/cesium": "~1.97.1",
+    "@vcmap/core": "~5.0.0-rc.23",
     "@vcmap/ui": "^5.0.0-rc.15",
     "@vitest/coverage-c8": "^0.24.5",
     "jest-canvas-mock": "^2.4.0",

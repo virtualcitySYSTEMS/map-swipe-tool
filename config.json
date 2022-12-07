@@ -1,5 +1,6 @@
 {
   "name": "swipe-tool",
   "noUi": false,
-  "hideSwipeElement": false
+  "hideSwipeElement": false,
+  "layers": []
 }

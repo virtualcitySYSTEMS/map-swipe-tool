@@ -1,5 +1,6 @@
 import { ScreenSpaceEventHandler, ScreenSpaceEventType } from '@vcmap/cesium';
 import { checkMaybe } from '@vcsuite/check';
+import { VcsEvent } from '@vcmap/core';
 
 
 /**
@@ -38,9 +39,8 @@ function createTitleElement(title, direction) {
 }
 
 /**
- * Creates an element which sets the position on the {@link vcs.vcm.util.SplitScreen} when moved
+ * Creates an element which sets the position on the {@link @vcmap/core.SplitScreen} when moved
  * @class
- * @memberOf vcs.vcm.widgets.swipeTool
  * @api
  */
 class SwipeElement {
@@ -57,6 +57,11 @@ class SwipeElement {
 
     /** @type {import("@vcmap/core").MapCollection} */
     this.mapCollection = mapCollection;
+    /**
+     * @type {function():void|null}
+     * @private
+     */
+    this._mapChangedListener = null;
 
     /**
      * @type {HTMLElement}
@@ -73,6 +78,10 @@ class SwipeElement {
      * @api
      */
     this.active = false;
+    /**
+     * @type {VcsEvent<any>}
+     */
+    this.stateChanged = new VcsEvent();
     this._setTitles();
   }
 
@@ -123,7 +132,9 @@ class SwipeElement {
       this.swipeEventHandler.setInputAction(() => { this.swipeActive = false; }, ScreenSpaceEventType.LEFT_UP);
       this.swipeEventHandler.setInputAction(this.onSwipingListener.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
       this.active = true;
+      this._mapChangedListener = this.mapCollection.mapActivated.addEventListener(this.handleMapChange.bind(this));
     }
+    this.stateChanged.raiseEvent(this.active);
   }
 
   /**
@@ -137,7 +148,11 @@ class SwipeElement {
       this.swipeEventHandler.removeInputAction(ScreenSpaceEventType.LEFT_UP);
       this.swipeEventHandler.removeInputAction(ScreenSpaceEventType.MOUSE_MOVE);
       this.active = false;
+      if (this._mapChangedListener) {
+        this._mapChangedListener();
+      }
     }
+    this.stateChanged.raiseEvent(this.active);
   }
 
   handleMapChange() {
@@ -176,6 +191,9 @@ class SwipeElement {
 
   destroy() {
     this.deactivate();
+    if (this._mapChangedListener) {
+      this._mapChangedListener();
+    }
   }
 }
 
