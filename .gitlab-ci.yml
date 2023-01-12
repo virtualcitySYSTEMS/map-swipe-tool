@@ -72,6 +72,13 @@ buildPreview:
   stage: bundle
   script:
     - npm run buildStagingApp
+  # workaround git+ssh plugin-cli
+  before_script:
+    - cd node_modules/@vcmap/ui
+    - npm i
+    - rm -rf node_modules/@vcmap/core
+    - npm run build
+    - cd ../../..
 
 bundle:
   <<: *after_build_definition

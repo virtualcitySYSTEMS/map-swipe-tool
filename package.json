@@ -1,5 +1,5 @@
 {
-  "name": "swipe-tool",
+  "name": "@vcmap/swipe-tool",
   "version": "1.0.0",
   "description": "A VC Map plugin to swipe split views.",
   "type": "module",
@@ -38,17 +38,21 @@
   ],
   "eslintConfig": {
     "root": true,
-    "extends": "@vcsuite/eslint-config/vue"
+    "extends": "@vcsuite/eslint-config/vue",
+    "rules": {
+      "jsdoc/check-tag-names": "off"
+    }
   },
   "dependencies": {
     "@vcsuite/check": "^1.1.2",
     "@vcsuite/logger": "^1.0.1",
-    "@vcsuite/parsers": "^1.0.1"
+    "@vcsuite/parsers": "^1.0.1",
+    "uuid": "^8.3.2"
   },
   "peerDependencies": {
     "@vcmap/cesium": "~1.97.1",
-    "@vcmap/core": "~5.0.0-rc.23",
-    "@vcmap/ui": "^5.0.0-rc.15",
+    "@vcmap/core": "~5.0.0-rc.25",
+    "@vcmap/ui": "^5.0.0-rc.17",
     "@vitest/coverage-c8": "^0.24.5",
     "jest-canvas-mock": "^2.4.0",
     "jsdom": "^20.0.2",
@@ -58,7 +62,7 @@
     "vuetify": "~2.6.7"
   },
   "devDependencies": {
-    "@vcmap/plugin-cli": "^2.0.11",
+    "@vcmap/plugin-cli": "^2.1.2",
     "@vcsuite/eslint-config": "^2.1.1"
   }
 }

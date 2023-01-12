@@ -1,64 +1,86 @@
 <template>
   <div>
-    <VcsFormSection
-      :title="`${$t('swipeTool.layers')}`"
-      :title-actions="titleActions"
-      help-text="swipeTool.help"
-    >
-      <template #help>
-        <p>{{ $t('swipeTool.help.general') }}</p>
-        <h3><v-icon>$vcsSplitView</v-icon> {{ $t('swipeTool.help.toggleHeader') }}</h3>
-        <p> {{ $t('swipeTool.help.toggle') }}</p>
-        <h3><v-icon>$vcsEye</v-icon> {{ $t('swipeTool.help.swipeHeader') }}</h3>
-        <p>{{ $t('swipeTool.help.swipe') }}</p>
-        <h3><b>L</b> | <b>R</b>  {{ $t('swipeTool.help.selectHeader') }}</h3>
-        <p>{{ $t('swipeTool.help.select') }}</p>
-      </template>
-      <template #default>
-        <VcsTreeview
-          v-if="tree.length > 0"
-          :items="tree"
-          item-children="visibleChildren"
-        />
-        <p v-else class="ma-2">
-          {{ $t('swipeTool.emptyTree') }}
-        </p>
-      </template>
-    </VcsFormSection>
+    <VcsActionButtonList
+      :actions="actions"
+      large
+      class="ma-1"
+    />
+    <div v-if="trees.length > 0">
+      <VcsFormSection
+        v-for="(tree, idx) in trees"
+        :key="subTreeIds[idx]"
+      >
+        <template #header>
+          <article class="pa-2 accent">
+            <div class="form-section-header d-flex align-center swipe-tree-header">
+              <div class="d-inline-flex">
+                <v-icon>
+                  {{ tree.icon }}
+                </v-icon>
+              </div>
+              <div class=" col-8">
+                <strong class="px-1">{{ $t(tree.title) }}</strong>
+              </div>
+              <div class="col-3 d-flex justify-center">
+                <strong>{{ $t('swipeTool.treeTitle') }}</strong>
+              </div>
+            </div>
+          </article>
+        </template>
+        <template #default>
+          <VcsTreeview
+            :items="tree.visibleChildren"
+            item-children="visibleChildren"
+          />
+        </template>
+      </VcsFormSection>
+    </div>
+    <p v-else class="ma-2">
+      {{ $t('swipeTool.emptyTree') }}
+    </p>
   </div>
 </template>
-<style>
+<style lang="scss">
+.swipe-tree-header {
+  height: 17px;
+}
+
 .vcm-swipe-element:before,
 .vcm-swipe-element:after
 {
-  font-family: FontAwesome;
-  font-size: 1em;
-  color: #ffffff;
+  color: var(--v-basic-base);
   text-decoration: none;
-  top: 50%;
+  top: 48%;
   position: absolute;
-  padding: 5px 2px;
-  background-color: #555555;
 }
 
 .vcm-swipe-element:before {
-  right: 3px;
-  content: "\f104";
-  border-bottom-left-radius: 4px 4px;
-  border-top-left-radius: 4px 4px;
+  right: -10px;
+  content: "";
+  background-color: var(--v-primary-base);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
 }
 
 .vcm-swipe-element:after {
-  left: 3px;
-  content: "\f105";
-  border-bottom-right-radius: 4px 4px;
-  border-top-right-radius: 4px 4px;
+  left: -9px;
+  content: "";
+  width: 24px;
+  height: 24px;
+  background-color: var(--v-basic-base);
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 
 .vcm-swipe-element {
   vertical-align: middle;
   width: 5px;
-  background-color: #555555;
+  background-color: var(--v-primary-base);
   touch-action: none;
 }
 
@@ -67,10 +89,10 @@
 }
 
 .vcm-swipe-element-title {
-  color: #ffffff;
+  color: var(--v-basic-base);
   white-space: nowrap;
   padding: 5px;
-  background-color: #555555;
+  background-color: var(--v-primary-base);
 }
 
 .vcm-swipe-element-title-left {
@@ -84,38 +106,59 @@
 }
 </style>
 <script>
-  import { computed, inject, ref } from 'vue';
+  import { computed, inject } from 'vue';
   import { VIcon } from 'vuetify/lib';
-  import { VcsFormSection, VcsTreeview } from '@vcmap/ui';
+  import { VcsFormSection, VcsTreeview, VcsActionButtonList } from '@vcmap/ui';
+  import { name } from '../package.json';
 
+  /**
+   * Component rendering a swipe tree with split actions derived from the content tree.
+   * Contains css styling for the SwipeElement.
+   * @vue-prop {Array<VcsAction>} actions - The swipe tool actions
+   * @vue-prop {VcsAction} swipeToolAction - The action to activate or deactivate the SwipeTool
+   * @vue-prop {VcsAction} swipeElementAction - The action to activate or deactivate the SwipeElement
+   */
   export default {
     name: 'SwipeTool',
-    props: {
-      titleActions: {
-        type: Array,
-        default: () => [],
-      },
-    },
     components: {
       VcsFormSection,
       VcsTreeview,
+      VcsActionButtonList,
       VIcon,
+    },
+    props: {
+      swipeToolAction: {
+        type: Object,
+        required: true,
+      },
+      swipeElementAction: {
+        type: Object,
+        required: true,
+      },
     },
     setup(props) {
       const app = inject('vcsApp');
-      const plugin = app.plugins.getByKey('swipe-tool');
-      if (!props.titleActions[0].active) {
-        props.titleActions[0].callback();
+      const plugin = app.plugins.getByKey(name);
+      if (!props.swipeToolAction.active) {
+        props.swipeToolAction.callback();
       }
 
-      const layerNames = ref(plugin.swipeTool.layerNames);
-      const tree = computed(() => {
-        return plugin.swipeTool.getSwipeTree(layerNames.value);
+      const actions = computed(() => {
+        if (props.swipeToolAction.active) {
+          return [props.swipeToolAction, props.swipeElementAction];
+        }
+        return [props.swipeToolAction];
+      });
+
+      const { subTreeIds } = plugin.swipeTool;
+      const trees = computed(() => {
+        return subTreeIds.value.map(id => plugin.swipeTool.getComputedVisibleTree(id).value);
       });
 
       return {
-        layerNames,
-        tree,
+        subTreeIds,
+        trees,
+        actions,
       };
     },
   };

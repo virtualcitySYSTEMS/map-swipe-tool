@@ -4,14 +4,14 @@ import { VcsEvent } from '@vcmap/core';
 
 
 /**
- * @param {import("@vcmap/core").MapCollection} mapCollection
+ * @param {number} splitPosition
  * @returns {HTMLElement}
  */
-function createSwipeElement(mapCollection) {
+function createSwipeElement(splitPosition) {
   const element = document.createElement('div');
   element.className = 'vcm-swipe-element';
   element.style.position = 'absolute';
-  element.style.left = `${100.0 * mapCollection.splitScreen.position}%`;
+  element.style.left = `${100.0 * splitPosition}%`;
   element.style.top = '0px';
   element.style.height = '100%';
   element.style.zIndex = '0';
@@ -27,14 +27,14 @@ function createTitleElement(title, direction) {
   const element = document.createElement('span');
   element.classList.add('vcm-swipe-element-title', `vcm-swipe-element-title-${direction}`);
   element.style.position = 'absolute';
-  element.style.top = '0px';
+  element.style.bottom = '3px';
   if (direction === 'left') {
     element.style.right = '3px';
   } else {
     element.style.left = '3px';
   }
   element.style.zIndex = '9999';
-  element.innerText = title;
+  element.innerText = title; // XXX title should be translated, as soon as app provides a translate method
   return element;
 }
 
@@ -67,8 +67,8 @@ class SwipeElement {
      * @type {HTMLElement}
      * @api
      */
-    this.element = createSwipeElement(mapCollection);
-    /** @type {Cesium/ScreenSpaceEventHandler} */
+    this.element = createSwipeElement(mapCollection.splitPosition);
+    /** @type {import("@vcmap/cesium").ScreenSpaceEventHandler} */
     this.swipeEventHandler =
       new ScreenSpaceEventHandler(/** @type {HTMLCanvasElement} */ (this.element));
     /** @type {boolean} */
@@ -79,21 +79,25 @@ class SwipeElement {
      */
     this.active = false;
     /**
-     * @type {VcsEvent<any>}
+     * @type {import("@vcmap/core").VcsEvent<boolean>}
      */
     this.stateChanged = new VcsEvent();
+    /**
+     * @type {import("@vcmap/core").VcsEvent<number>}
+     */
+    this.positionChanged = new VcsEvent();
     this._setTitles();
   }
 
   /**
    * The titles on the swipe element
-   * @type {Object<string, string>|null}
+   * @type {Object<string, string>|undefined}
    * @api
    */
   get titles() { return this._titles; }
 
   /**
-   * @param {Object<string, string>|null} titles
+   * @param {Object<string, string>|undefined} titles
    */
   set titles(titles) {
     checkMaybe(titles, Object);
@@ -127,7 +131,7 @@ class SwipeElement {
   activate() {
     if (!this.active) {
       this._addElementToMap();
-      this.element.style.left = `${100.0 * this.mapCollection.splitScreen.position}%`;
+      this.element.style.left = `${100.0 * this.mapCollection.splitPosition}%`;
       this.swipeEventHandler.setInputAction(() => { this.swipeActive = true; }, ScreenSpaceEventType.LEFT_DOWN);
       this.swipeEventHandler.setInputAction(() => { this.swipeActive = false; }, ScreenSpaceEventType.LEFT_UP);
       this.swipeEventHandler.setInputAction(this.onSwipingListener.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
@@ -182,9 +186,9 @@ class SwipeElement {
       const splitPosition = (this.element.offsetLeft + relativeOffset) /
         this.element.parentElement.offsetWidth;
       if (splitPosition > 0.01 && splitPosition < 0.99) {
-        const { splitScreen } = this.mapCollection;
-        splitScreen.position = splitPosition;
-        this.element.style.left = `${100.0 * splitScreen.position}%`;
+        this.mapCollection.splitPosition = splitPosition;
+        this.element.style.left = `${100.0 * this.mapCollection.splitPosition}%`;
+        this.positionChanged.raiseEvent(splitPosition);
       }
     }
   }

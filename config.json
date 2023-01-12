@@ -1,6 +1,15 @@
 {
-  "name": "swipe-tool",
-  "noUi": false,
-  "hideSwipeElement": false,
-  "layers": []
+  "name": "@vcmap/swipe-tool",
+  "showSwipeTree": true,
+  "showSwipeElement": true,
+  "swipeLayerStates": {
+    "Openstreetmap OSM Cache": {
+      "active": true,
+      "splitDirection": "right"
+    }
+  },
+  "swipeElementTitles": {
+    "left": "Left title",
+    "right": "Right title"
+  }
 }
