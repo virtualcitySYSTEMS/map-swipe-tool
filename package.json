@@ -1,6 +1,6 @@
 {
   "name": "@vcmap/swipe-tool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A VC Map plugin to swipe split views.",
   "type": "module",
   "main": "src/index.js",
