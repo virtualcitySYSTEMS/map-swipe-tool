@@ -1,7 +1,19 @@
-import { createToggleAction, ToolboxType, WindowSlot } from '@vcmap/ui';
+import { ToolboxType, WindowSlot } from '@vcmap/ui';
 import { reactive } from 'vue';
 import SwipeToolComponent from './swipeToolComponent.vue';
 import { name as pluginName } from '../package.json';
+
+/**
+ * @param {boolean} active
+ * @returns {string}
+ */
+function getToggleTitle(active) {
+  if (active) {
+    return 'swipeTool.deactivateToolTitle';
+  } else {
+    return 'swipeTool.activateToolTitle';
+  }
+}
 
 /**
  *
@@ -37,8 +49,103 @@ function createSwipeElementAction(swipeElement) {
  * @param {SwipeTool} swipeTool
  * @returns {function():void}
  */
-export default function setupSwipeToolActions(app, swipeTool) {
-  const swipeToolAction = reactive({
+export function setupSwipeToolActions(app, swipeTool) {
+  const { action: swipeElementAction, destroy: swipeElementDestroy } = createSwipeElementAction(swipeTool.swipeElement);
+  /**
+   *
+   * @type {import("@vcmap/ui").WindowComponentOptions}
+   */
+  const windowComponent = {
+    id: 'swipe-tool-window',
+    component: SwipeToolComponent,
+    slot: WindowSlot.DYNAMIC_LEFT,
+    state: {
+      headerTitle: 'swipeTool.title',
+      headerIcon: '$vcsSplitView',
+      headerActions: [swipeElementAction],
+      // infoUrl: 'https://vc.systems',
+    },
+  };
+
+  const action = reactive({
+    name: 'swipe-action',
+    title: 'swipeTool.title',
+    icon: '$vcsSplitView',
+    active: false,
+    background: false,
+    callback() {
+      if (this.active) {
+        if (this.background) {
+          return app.windowManager.add(windowComponent, pluginName);
+        } else {
+          app.windowManager.remove(windowComponent.id);
+          swipeTool.deactivate();
+          this.active = false;
+        }
+        this.background = false;
+      } else {
+        swipeTool.activate();
+        this.active = true;
+        return app.windowManager.add(windowComponent, pluginName);
+      }
+      this.title = getToggleTitle(this.active);
+      return null;
+    },
+  });
+
+  const listeners = [
+    app.windowManager.added.addEventListener(({ id }) => {
+      if (id === windowComponent.id) {
+        action.active = true;
+        action.background = false;
+      }
+    }),
+    app.windowManager.removed.addEventListener(({ id }) => {
+      if (id === windowComponent.id) {
+        action.background = true;
+      }
+    }),
+    swipeTool.stateChanged.addEventListener((active) => {
+      action.active = active;
+      action.title = getToggleTitle(active);
+    }),
+  ];
+
+  if (app.toolboxManager.has(pluginName)) {
+    app.toolboxManager.remove(pluginName);
+  }
+  app.toolboxManager.add(
+    {
+      id: pluginName,
+      type: ToolboxType.SINGLE,
+      action,
+    },
+    pluginName,
+  );
+
+  const destroy = () => {
+    if (app.toolboxManager.has(pluginName)) {
+      app.toolboxManager.remove(pluginName);
+    }
+    if (app.windowManager.has(windowComponent.id)) {
+      app.windowManager.remove(windowComponent.id);
+    }
+    if (swipeElementDestroy) {
+      swipeElementDestroy();
+    }
+    listeners.forEach(cb => cb());
+  };
+
+  return destroy;
+}
+
+/**
+ * @param {import("@vcmap/ui").VcsUiApp} app
+ * @param {SwipeTool} swipeTool
+ * @returns {function():void}
+ */
+export function setupSwipeToolActionsNoUI(app, swipeTool) {
+  const action = reactive({
     name: 'swipe-action',
     title: 'swipeTool.title',
     icon: '$vcsSplitView',
@@ -53,38 +160,14 @@ export default function setupSwipeToolActions(app, swipeTool) {
         this.active = true;
         this.title = 'swipeTool.deactivateToolTitle';
       }
+      return null;
     },
   });
 
-  let toggle;
-  let swipeElementAction;
-  if (swipeTool.showSwipeTree) {
-    swipeElementAction = createSwipeElementAction(swipeTool.swipeElement);
-
-    const windowComponent = {
-      id: 'swipe-tool-window',
-      component: SwipeToolComponent,
-      slot: WindowSlot.DYNAMIC_LEFT,
-      state: {
-        headerTitle: 'swipeTool.title',
-        headerIcon: '$vcsSplitView',
-        // infoUrl: 'https://vc.systems',
-      },
-      props: {
-        swipeToolAction,
-        swipeElementAction: swipeElementAction.action,
-      },
-    };
-    toggle = createToggleAction(
-      {
-        name: 'swipe-tool-toggle',
-        icon: '$vcsSplitView',
-      },
-      windowComponent,
-      app.windowManager,
-      pluginName,
-    );
-  }
+  const listener = swipeTool.stateChanged.addEventListener((active) => {
+    action.active = active;
+    action.title = getToggleTitle(active);
+  });
 
   if (app.toolboxManager.has(pluginName)) {
     app.toolboxManager.remove(pluginName);
@@ -93,21 +176,16 @@ export default function setupSwipeToolActions(app, swipeTool) {
     {
       id: pluginName,
       type: ToolboxType.SINGLE,
-      action: swipeTool.showSwipeTree ? toggle.action : swipeToolAction,
+      action,
     },
     pluginName,
   );
 
   const destroy = () => {
-    if (app.windowManager.has('swipe-tool-window')) {
-      app.windowManager.remove('swipe-tool-window');
+    if (app.toolboxManager.has(pluginName)) {
+      app.toolboxManager.remove(pluginName);
     }
-    if (toggle) {
-      toggle.destroy();
-    }
-    if (swipeElementAction) {
-      swipeElementAction.destroy();
-    }
+    listener();
   };
 
   return destroy;

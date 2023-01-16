@@ -52,7 +52,7 @@
   "peerDependencies": {
     "@vcmap/cesium": "~1.97.1",
     "@vcmap/core": "~5.0.0-rc.25",
-    "@vcmap/ui": "^5.0.0-rc.17",
+    "@vcmap/ui": "^5.0.0-rc.18",
     "@vitest/coverage-c8": "^0.24.5",
     "jest-canvas-mock": "^2.4.0",
     "jsdom": "^20.0.2",

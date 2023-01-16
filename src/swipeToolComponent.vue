@@ -1,10 +1,5 @@
 <template>
   <div>
-    <VcsActionButtonList
-      :actions="actions"
-      large
-      class="ma-1"
-    />
     <div v-if="trees.length > 0">
       <VcsFormSection
         v-for="(tree, idx) in trees"
@@ -108,47 +103,23 @@
 <script>
   import { computed, inject } from 'vue';
   import { VIcon } from 'vuetify/lib';
-  import { VcsFormSection, VcsTreeview, VcsActionButtonList } from '@vcmap/ui';
+  import { VcsFormSection, VcsTreeview } from '@vcmap/ui';
   import { name } from '../package.json';
 
   /**
    * Component rendering a swipe tree with split actions derived from the content tree.
    * Contains css styling for the SwipeElement.
-   * @vue-prop {Array<VcsAction>} actions - The swipe tool actions
-   * @vue-prop {VcsAction} swipeToolAction - The action to activate or deactivate the SwipeTool
-   * @vue-prop {VcsAction} swipeElementAction - The action to activate or deactivate the SwipeElement
    */
   export default {
     name: 'SwipeTool',
     components: {
       VcsFormSection,
       VcsTreeview,
-      VcsActionButtonList,
       VIcon,
     },
-    props: {
-      swipeToolAction: {
-        type: Object,
-        required: true,
-      },
-      swipeElementAction: {
-        type: Object,
-        required: true,
-      },
-    },
-    setup(props) {
+    setup() {
       const app = inject('vcsApp');
       const plugin = app.plugins.getByKey(name);
-      if (!props.swipeToolAction.active) {
-        props.swipeToolAction.callback();
-      }
-
-      const actions = computed(() => {
-        if (props.swipeToolAction.active) {
-          return [props.swipeToolAction, props.swipeElementAction];
-        }
-        return [props.swipeToolAction];
-      });
 
       const { subTreeIds } = plugin.swipeTool;
       const trees = computed(() => {
@@ -158,7 +129,6 @@
       return {
         subTreeIds,
         trees,
-        actions,
       };
     },
   };

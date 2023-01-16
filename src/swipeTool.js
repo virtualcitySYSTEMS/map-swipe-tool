@@ -9,10 +9,10 @@ import {
 } from '@vcmap/ui';
 import { computed, ref } from 'vue';
 import { SplitDirection } from '@vcmap/cesium';
-import { name as pluginName } from '../package.json';
+import { VcsEvent } from '@vcmap/core';
 import SwipeElement from './swipeElement.js';
 import LayerSwipeTreeItem from './swipeTree/layerSwipeTreeItem.js';
-import setupSwipeToolActions from './actionHelper.js';
+import { setupSwipeToolActions, setupSwipeToolActionsNoUI } from './actionHelper.js';
 import GroupSwipeTreeItem from './swipeTree/groupSwipeTreeItem.js';
 import LayerGroupSwipeTreeItem from './swipeTree/layerGroupSwipeTreeItem.js';
 
@@ -132,6 +132,10 @@ class SwipeTool {
      * @private
      */
     this._subTreeViewItems = new Map();
+    /**
+     * @type {import("@vcmap/core").VcsEvent<boolean>}
+     */
+    this.stateChanged = new VcsEvent();
 
     this._listeners = [
       app.contentTree.added.addEventListener(this.handleItemAdded.bind(this)),
@@ -145,7 +149,8 @@ class SwipeTool {
      * @type {function(): void}
      * @private
      */
-    this._destroyActions = setupSwipeToolActions(this._app, this);
+    this._destroyActions = this._showSwipeTree ?
+      setupSwipeToolActions(this._app, this) : setupSwipeToolActionsNoUI(this._app, this);
   }
 
   /**
@@ -211,7 +216,8 @@ class SwipeTool {
     check(value, Boolean);
     this._showSwipeTree = value;
     this._destroyActions();
-    this._destroyActions = setupSwipeToolActions(this._app, this);
+    this._destroyActions = this._showSwipeTree ?
+      setupSwipeToolActions(this._app, this) : setupSwipeToolActionsNoUI(this._app, this);
   }
 
   /**
@@ -252,13 +258,10 @@ class SwipeTool {
         this._swipeElement.activate();
       }
       this._initialState = this.getState();
-      this.setTreeView();
-      const { action } = this._app.toolboxManager.get(pluginName);
-      if (!action?.active) {
-        action.callback();
-      }
       this._active = true;
+      this.setTreeView();
       this.applyState(this._cachedState);
+      this.stateChanged.raiseEvent(this._active);
     }
   }
 
@@ -274,6 +277,7 @@ class SwipeTool {
       this.applyState(this._initialState);
       this._clearSwipeTree();
       this._active = false;
+      this.stateChanged.raiseEvent(this._active);
     }
   }
 
@@ -340,7 +344,7 @@ class SwipeTool {
    */
   setTreeView() {
     this._clearSwipeTree();
-    if (this._showSwipeTree) {
+    if (this._active && this._showSwipeTree) {
       [...this._app.contentTree.subTreeViewItems.value.values()].forEach((subTree, idx) => {
         const { name, title, tooltip, icon } = subTree;
         const mappedItem = new SubContentTreeItem({ name, title, tooltip, icon }, this._app);
@@ -500,6 +504,7 @@ class SwipeTool {
 
   destroy() {
     this.clear();
+    this.stateChanged.destroy();
     this._listeners.forEach(cb => cb());
     if (this._destroyActions) {
       this._destroyActions();
