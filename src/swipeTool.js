@@ -8,7 +8,7 @@ import {
   SubContentTreeItem,
 } from '@vcmap/ui';
 import { computed, ref } from 'vue';
-import { SplitDirection } from '@vcmap/cesium';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import { VcsEvent } from '@vcmap/core';
 import SwipeElement from './swipeElement.js';
 import LayerSwipeTreeItem from './swipeTree/layerSwipeTreeItem.js';
@@ -33,7 +33,7 @@ export function parseSwipeLayerState(options) {
 
 /**
  * @typedef {Object} SwipeLayerState
- * @property {import("@vcmap/cesium").SplitDirection} splitDirection
+ * @property {import("@vcmap-cesium/engine").SplitDirection} splitDirection
  * @property {boolean} active
  */
 

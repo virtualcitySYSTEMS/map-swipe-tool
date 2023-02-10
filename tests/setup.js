@@ -13,5 +13,5 @@ import Vue from 'vue';
 
 Vue.config.productionTip = false;
 
-window.CESIUM_BASE_URL = '/node_modules/@vcmap/cesium/Build/CesiumUnminified/';
+window.CESIUM_BASE_URL = '/node_modules/@vcmap-cesium/engine/Build/';
 

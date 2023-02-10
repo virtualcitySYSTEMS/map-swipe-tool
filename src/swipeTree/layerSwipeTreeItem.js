@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { VcsObjectContentTreeItem } from '@vcmap/ui';
-import { SplitDirection } from '@vcmap/cesium';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import { check } from '@vcsuite/check';
 
 /**
@@ -31,9 +31,9 @@ const stateIconMap = {
  * @type {Object<SplitActionState, string>}
  */
 const stateI18nMap = {
-  [SplitActionState.INACTIVE]: 'swipeTool.stateAction.titleInactive',
-  [SplitActionState.ACTIVE]: 'swipeTool.stateAction.titleActive',
-  [SplitActionState.INDETERMINATE]: 'swipeTool.stateAction.titleIndeterminate',
+  [SplitActionState.INACTIVE]: 'swipeTool.stateActionTitles.inactive',
+  [SplitActionState.ACTIVE]: 'swipeTool.stateActionTitles.active',
+  [SplitActionState.INDETERMINATE]: 'swipeTool.stateActionTitles.indeterminate',
 };
 
 /**
@@ -77,7 +77,7 @@ export function createSplitStateRefActions(splitStateObj, callback) {
  * applies splitDirection on a layer
  * @param {import("@vcmap/core").LayerCollection} layerCollection
  * @param {import("@vcmap/core").SplitLayer} layer
- * @param {import("@vcmap/cesium").SplitDirection} direction
+ * @param {import("@vcmap-cesium/engine").SplitDirection} direction
  * @returns {Promise<void>}
  */
 export function toggle(layerCollection, layer, direction) {

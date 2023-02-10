@@ -1,5 +1,5 @@
 import { watch } from 'vue';
-import { SplitDirection } from '@vcmap/cesium';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import {
   createSplitStateRefActions,
   SplitActionState,

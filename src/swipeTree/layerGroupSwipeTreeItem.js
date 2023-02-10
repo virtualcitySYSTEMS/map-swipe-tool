@@ -1,4 +1,4 @@
-import { SplitDirection } from '@vcmap/cesium';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import { createSplitStateRefActions, getSplitStateFromLayer, SplitActionState, toggle } from './layerSwipeTreeItem.js';
 import SwipeTreeItem from './swipeTreeItem.js';
 

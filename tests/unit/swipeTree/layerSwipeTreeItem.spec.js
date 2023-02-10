@@ -1,7 +1,7 @@
 import { ObliqueMap, OpenlayersMap, VectorLayer } from '@vcmap/core';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { VcsUiApp } from '@vcmap/ui';
-import { SplitDirection } from '@vcmap/cesium';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import LayerSwipeTreeItem, { SplitActionState } from '../../../src/swipeTree/layerSwipeTreeItem.js';
 
 describe('LayerContentTreeItem', () => {

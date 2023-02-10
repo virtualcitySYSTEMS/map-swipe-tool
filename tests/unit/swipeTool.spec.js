@@ -2,7 +2,7 @@ import {
   describe, it, expect, beforeAll, afterAll, vi,
 } from 'vitest';
 import { LayerContentTreeItem, VcsUiApp } from '@vcmap/ui';
-import { SplitDirection } from '@vcmap/cesium';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import { OpenlayersMap, VectorLayer } from '@vcmap/core';
 import { sleep } from '../helpers.js';
 import SwipeTool, { parseSwipeLayerState } from '../../src/swipeTool.js';

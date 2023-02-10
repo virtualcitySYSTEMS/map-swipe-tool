@@ -1,4 +1,4 @@
-import { ScreenSpaceEventHandler, ScreenSpaceEventType } from '@vcmap/cesium';
+import { ScreenSpaceEventHandler, ScreenSpaceEventType } from '@vcmap-cesium/engine';
 import { checkMaybe } from '@vcsuite/check';
 import { VcsEvent } from '@vcmap/core';
 
@@ -68,7 +68,7 @@ class SwipeElement {
      * @api
      */
     this.element = createSwipeElement(mapCollection.splitPosition);
-    /** @type {import("@vcmap/cesium").ScreenSpaceEventHandler} */
+    /** @type {import("@vcmap-cesium/engine").ScreenSpaceEventHandler} */
     this.swipeEventHandler =
       new ScreenSpaceEventHandler(/** @type {HTMLCanvasElement} */ (this.element));
     /** @type {boolean} */

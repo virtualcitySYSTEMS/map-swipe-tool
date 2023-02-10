@@ -9,7 +9,7 @@ import {
 } from 'vitest';
 import { ObliqueMap, OpenlayersMap, VectorLayer } from '@vcmap/core';
 import { VcsUiApp } from '@vcmap/ui';
-import { SplitDirection } from '@vcmap/cesium';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import LayerGroupSwipeTreeItem from '../../../src/swipeTree/layerGroupSwipeTreeItem.js';
 import { SplitActionState } from '../../../src/swipeTree/layerSwipeTreeItem.js';
 
