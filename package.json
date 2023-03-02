@@ -51,8 +51,8 @@
   },
   "peerDependencies": {
     "@vcmap-cesium/engine": "~1.1.2",
-    "@vcmap/core": "~5.0.0-rc.26",
-    "@vcmap/ui": "^5.0.0-rc.21",
+    "@vcmap/core": "~5.0.0-rc.27",
+    "@vcmap/ui": "^5.0.0-rc.22",
     "@vitest/coverage-c8": "^0.24.5",
     "jest-canvas-mock": "^2.4.0",
     "jsdom": "^20.0.2",
@@ -62,7 +62,8 @@
     "vuetify": "~2.6.7"
   },
   "devDependencies": {
-    "@vcmap/plugin-cli": "^2.1.3",
-    "@vcsuite/eslint-config": "^2.1.1"
+    "@vcmap/plugin-cli": "^2.1.4",
+    "@vcsuite/eslint-config": "^2.1.1",
+    "resize-observer-polyfill": "1.5.1"
   }
 }

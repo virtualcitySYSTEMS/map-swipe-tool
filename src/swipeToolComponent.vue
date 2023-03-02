@@ -6,7 +6,7 @@
         :key="subTreeIds[idx]"
       >
         <template #header>
-          <article class="pa-2 accent">
+          <article class="pa-2 vcm-tree-header">
             <div class="form-section-header d-flex align-center swipe-tree-header">
               <div class="d-inline-flex">
                 <v-icon>
@@ -43,7 +43,6 @@
 .vcm-swipe-element:before,
 .vcm-swipe-element:after
 {
-  color: var(--v-basic-base);
   text-decoration: none;
   top: 48%;
   position: absolute;
@@ -63,7 +62,7 @@
   content: "";
   width: 24px;
   height: 24px;
-  background-color: var(--v-basic-base);
+  background-color: var(--v-base-lighten5);
   -webkit-mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
   mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
   -webkit-mask-repeat: no-repeat;
@@ -84,7 +83,7 @@
 }
 
 .vcm-swipe-element-title {
-  color: var(--v-basic-base);
+  color: var(--v-base-lighten5);
   white-space: nowrap;
   padding: 5px;
   background-color: var(--v-primary-base);
@@ -98,6 +97,9 @@
 .vcm-swipe-element-title-right {
   border-bottom-right-radius: 4px 4px;
   border-top-right-radius: 4px 4px;
+}
+.vcm-tree-header {
+  background-color: var(--v-base-lighten3);
 }
 </style>
 <script>
