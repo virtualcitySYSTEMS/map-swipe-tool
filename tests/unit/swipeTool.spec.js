@@ -1,6 +1,4 @@
-import {
-  describe, it, expect, beforeAll, afterAll, vi,
-} from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { LayerContentTreeItem, VcsUiApp } from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import { OpenlayersMap, VectorLayer } from '@vcmap/core';
@@ -41,7 +39,10 @@ describe('SwipeTool', () => {
       const { sampleLayer } = options.swipeLayerStates;
       const swipeLayerState = parseSwipeLayerState(sampleLayer);
       expect(swipeLayerState).to.have.property('active', sampleLayer.active);
-      expect(swipeLayerState).to.have.property('splitDirection', SplitDirection.LEFT);
+      expect(swipeLayerState).to.have.property(
+        'splitDirection',
+        SplitDirection.LEFT,
+      );
     });
   });
 
@@ -60,16 +61,28 @@ describe('SwipeTool', () => {
     });
 
     it('should set shopSwipeTree', () => {
-      expect(swipeTool).to.have.property('showSwipeTree', options.showSwipeTree);
+      expect(swipeTool).to.have.property(
+        'showSwipeTree',
+        options.showSwipeTree,
+      );
     });
     it('should set showSwipeElement', () => {
-      expect(swipeTool).to.have.property('showSwipeElement', options.showSwipeElement);
+      expect(swipeTool).to.have.property(
+        'showSwipeElement',
+        options.showSwipeElement,
+      );
     });
     it('should set splitPosition', () => {
-      expect(swipeTool).to.have.property('splitPosition', options.splitPosition);
+      expect(swipeTool).to.have.property(
+        'splitPosition',
+        options.splitPosition,
+      );
     });
     it('should set swipeElementTitles', () => {
-      expect(swipeTool).to.have.property('swipeElementTitles', options.swipeElementTitles);
+      expect(swipeTool).to.have.property(
+        'swipeElementTitles',
+        options.swipeElementTitles,
+      );
     });
   });
 
@@ -82,7 +95,10 @@ describe('SwipeTool', () => {
     beforeAll(async () => {
       app = await setupMap();
       layer = new VectorLayer({ name: 'sampleLayer' });
-      item = new LayerContentTreeItem({ name: 'foo', layerName: layer.name }, app);
+      item = new LayerContentTreeItem(
+        { name: 'foo', layerName: layer.name },
+        app,
+      );
       app.layers.add(layer);
       app.contentTree.add(item);
       swipeTool = new SwipeTool(app, options);
@@ -100,7 +116,10 @@ describe('SwipeTool', () => {
         const state = swipeTool.getState();
         expect(state).to.have.property('sampleLayer');
         expect(state.sampleLayer).to.have.property('active', layer.active);
-        expect(state.sampleLayer).to.have.property('splitDirection', layer.splitDirection);
+        expect(state.sampleLayer).to.have.property(
+          'splitDirection',
+          layer.splitDirection,
+        );
       });
     });
 
@@ -124,7 +143,10 @@ describe('SwipeTool', () => {
         swipeTool.setState(state);
         await sleep(10);
         expect(layer).to.have.property('active', state.sampleLayer.active);
-        expect(layer).to.have.property('splitDirection', state.sampleLayer.splitDirection);
+        expect(layer).to.have.property(
+          'splitDirection',
+          state.sampleLayer.splitDirection,
+        );
         swipeTool.clear();
       });
     });
@@ -207,7 +229,10 @@ describe('SwipeTool', () => {
       const swipeTool = new SwipeTool(app, options);
       const config = swipeTool.toJSON();
       expect(config).to.have.property('splitPosition', options.splitPosition);
-      expect(config).to.have.property('swipeElementTitles', options.swipeElementTitles);
+      expect(config).to.have.property(
+        'swipeElementTitles',
+        options.swipeElementTitles,
+      );
       swipeTool.destroy();
       app.destroy();
     });

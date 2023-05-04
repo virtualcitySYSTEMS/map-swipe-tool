@@ -72,13 +72,6 @@ buildPreview:
   stage: bundle
   script:
     - npm run buildStagingApp
-  # workaround git+ssh plugin-cli
-  before_script:
-    - cd node_modules/@vcmap/ui
-    - npm i
-    - rm -rf node_modules/@vcmap/core
-    - npm run build
-    - cd ../../..
 
 bundle:
   <<: *after_build_definition
@@ -100,7 +93,7 @@ deployStaging:
     on_stop: stopEnvironment
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [ "" ]
+    entrypoint: ['']
   script:
     - /kaniko/executor --context dist/ --dockerfile build/staging/Dockerfile --destination $CI_REGISTRY_IMAGE/staging:$CI_COMMIT_REF_SLUG
   before_script:
@@ -113,7 +106,7 @@ stopEnvironment:
     GIT_STRATEGY: none
   image:
     name: bitnami/kubectl:latest
-    entrypoint: [""]
+    entrypoint: ['']
   tags:
     - linux-2.0
   script:

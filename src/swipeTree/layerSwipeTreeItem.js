@@ -87,25 +87,29 @@ export function toggle(layerCollection, layer, direction) {
     } else if (layer.splitDirection === direction) {
       layer.deactivate();
     } else if (layer.splitDirection === SplitDirection.NONE) {
-      layer.splitDirection = direction === SplitDirection.RIGHT ?
-        SplitDirection.LEFT :
-        SplitDirection.RIGHT;
+      layer.splitDirection =
+        direction === SplitDirection.RIGHT
+          ? SplitDirection.LEFT
+          : SplitDirection.RIGHT;
     }
     return Promise.resolve();
   }
 
   if (layer.exclusiveGroups.length > 0) {
     const activeLayersForGroup = layer.exclusiveGroups
-      .map(group => layerCollection.exclusiveManager.getActiveLayersForGroup(group))
+      .map((group) =>
+        layerCollection.exclusiveManager.getActiveLayersForGroup(group),
+      )
       .flat();
 
     if (
       activeLayersForGroup.length === 1 &&
       activeLayersForGroup[0].splitDirection === SplitDirection.NONE
     ) {
-      activeLayersForGroup[0].splitDirection = direction === SplitDirection.RIGHT ?
-        SplitDirection.LEFT :
-        SplitDirection.RIGHT;
+      activeLayersForGroup[0].splitDirection =
+        direction === SplitDirection.RIGHT
+          ? SplitDirection.LEFT
+          : SplitDirection.RIGHT;
     }
   }
   layer.splitDirection = direction;
@@ -119,11 +123,17 @@ export function toggle(layerCollection, layer, direction) {
 export function getSplitStateFromLayer(layer) {
   if (layer.active) {
     if (layer.splitDirection === SplitDirection.LEFT) {
-      return { left: SplitActionState.ACTIVE, right: SplitActionState.INACTIVE };
+      return {
+        left: SplitActionState.ACTIVE,
+        right: SplitActionState.INACTIVE,
+      };
     } else if (layer.splitDirection === SplitDirection.NONE) {
       return { left: SplitActionState.ACTIVE, right: SplitActionState.ACTIVE };
     } else {
-      return { left: SplitActionState.INACTIVE, right: SplitActionState.ACTIVE };
+      return {
+        left: SplitActionState.INACTIVE,
+        right: SplitActionState.ACTIVE,
+      };
     }
   }
   return { left: SplitActionState.INACTIVE, right: SplitActionState.INACTIVE };
@@ -143,7 +153,9 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem {
   /**
    * @returns {string}
    */
-  static get className() { return 'LayerSwipeTreeItem'; }
+  static get className() {
+    return 'LayerSwipeTreeItem';
+  }
 
   /**
    * @param {LayerSwipeTreeItemOptions} options
@@ -201,7 +213,9 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem {
    * @type {import("@vcmap/core").SplitLayer}
    */
   get layer() {
-    return /** @type {import("@vcmap/core").SplitLayer} */ this._app.layers.getByKey(this._layerName);
+    return /** @type {import("@vcmap/core").SplitLayer} */ this._app.layers.getByKey(
+      this._layerName,
+    );
   }
 
   /**
@@ -213,14 +227,16 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem {
 
     const cb = toggle.bind(this, this._app.maps.layerCollection, this.layer);
     const actions = createSplitStateRefActions(this._splitState, cb);
-    actions.forEach(a => this.addAction(a));
+    actions.forEach((a) => this.addAction(a));
   }
 
   /**
    * @private
    */
   _clearListeners() {
-    this._listeners.forEach((cb) => { cb(); });
+    this._listeners.forEach((cb) => {
+      cb();
+    });
     this._listeners.splice(0);
   }
 
@@ -242,24 +258,36 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem {
 
     if (!this.layer) {
       this.visible = false;
-      this._listeners.push(this._app.layers.added.addEventListener(resetHandler));
+      this._listeners.push(
+        this._app.layers.added.addEventListener(resetHandler),
+      );
     } else {
       this.visible = this.layer.isSupported(this._app.maps.activeMap);
       this.setPropertiesFromObject(this.layer);
 
-      this._listeners.push(this._app.layers.removed.addEventListener(resetHandler));
-      this._listeners.push(this._app.layers.added.addEventListener(resetHandler));
+      this._listeners.push(
+        this._app.layers.removed.addEventListener(resetHandler),
+      );
+      this._listeners.push(
+        this._app.layers.added.addEventListener(resetHandler),
+      );
 
-      this._listeners.push(this._app.maps.mapActivated.addEventListener(() => {
-        this.visible = this.layer.isSupported(this._app.maps.activeMap);
-      }));
+      this._listeners.push(
+        this._app.maps.mapActivated.addEventListener(() => {
+          this.visible = this.layer.isSupported(this._app.maps.activeMap);
+        }),
+      );
 
-      this._listeners.push(this.layer.stateChanged.addEventListener(() => {
-        this.splitState = getSplitStateFromLayer(this.layer);
-      }));
-      this._listeners.push(this.layer.splitDirectionChanged.addEventListener(() => {
-        this.splitState = getSplitStateFromLayer(this.layer);
-      }));
+      this._listeners.push(
+        this.layer.stateChanged.addEventListener(() => {
+          this.splitState = getSplitStateFromLayer(this.layer);
+        }),
+      );
+      this._listeners.push(
+        this.layer.splitDirectionChanged.addEventListener(() => {
+          this.splitState = getSplitStateFromLayer(this.layer);
+        }),
+      );
 
       this.splitState = getSplitStateFromLayer(this.layer);
     }

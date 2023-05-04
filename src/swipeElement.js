@@ -1,7 +1,9 @@
-import { ScreenSpaceEventHandler, ScreenSpaceEventType } from '@vcmap-cesium/engine';
+import {
+  ScreenSpaceEventHandler,
+  ScreenSpaceEventType,
+} from '@vcmap-cesium/engine';
 import { checkMaybe } from '@vcsuite/check';
 import { VcsEvent } from '@vcmap/core';
-
 
 /**
  * @param {number} splitPosition
@@ -25,7 +27,10 @@ function createSwipeElement(splitPosition) {
  */
 function createTitleElement(title, direction) {
   const element = document.createElement('span');
-  element.classList.add('vcm-swipe-element-title', `vcm-swipe-element-title-${direction}`);
+  element.classList.add(
+    'vcm-swipe-element-title',
+    `vcm-swipe-element-title-${direction}`,
+  );
   element.style.position = 'absolute';
   element.style.bottom = '3px';
   if (direction === 'left') {
@@ -69,8 +74,9 @@ class SwipeElement {
      */
     this.element = createSwipeElement(mapCollection.splitPosition);
     /** @type {import("@vcmap-cesium/engine").ScreenSpaceEventHandler} */
-    this.swipeEventHandler =
-      new ScreenSpaceEventHandler(/** @type {HTMLCanvasElement} */ (this.element));
+    this.swipeEventHandler = new ScreenSpaceEventHandler(
+      /** @type {HTMLCanvasElement} */ (this.element),
+    );
     /** @type {boolean} */
     this.swipeActive = false;
     /**
@@ -94,7 +100,9 @@ class SwipeElement {
    * @type {Object<string, string>|undefined}
    * @api
    */
-  get titles() { return this._titles; }
+  get titles() {
+    return this._titles;
+  }
 
   /**
    * @param {Object<string, string>|undefined} titles
@@ -119,7 +127,9 @@ class SwipeElement {
         this.element.appendChild(createTitleElement(this.titles.left, 'left'));
       }
       if (this._titles.right) {
-        this.element.appendChild(createTitleElement(this.titles.right, 'right'));
+        this.element.appendChild(
+          createTitleElement(this.titles.right, 'right'),
+        );
       }
     }
   }
@@ -132,11 +142,21 @@ class SwipeElement {
     if (!this.active) {
       this._addElementToMap();
       this.element.style.left = `${100.0 * this.mapCollection.splitPosition}%`;
-      this.swipeEventHandler.setInputAction(() => { this.swipeActive = true; }, ScreenSpaceEventType.LEFT_DOWN);
-      this.swipeEventHandler.setInputAction(() => { this.swipeActive = false; }, ScreenSpaceEventType.LEFT_UP);
-      this.swipeEventHandler.setInputAction(this.onSwipingListener.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
+      this.swipeEventHandler.setInputAction(() => {
+        this.swipeActive = true;
+      }, ScreenSpaceEventType.LEFT_DOWN);
+      this.swipeEventHandler.setInputAction(() => {
+        this.swipeActive = false;
+      }, ScreenSpaceEventType.LEFT_UP);
+      this.swipeEventHandler.setInputAction(
+        this.onSwipingListener.bind(this),
+        ScreenSpaceEventType.MOUSE_MOVE,
+      );
       this.active = true;
-      this._mapChangedListener = this.mapCollection.mapActivated.addEventListener(this.handleMapChange.bind(this));
+      this._mapChangedListener =
+        this.mapCollection.mapActivated.addEventListener(
+          this.handleMapChange.bind(this),
+        );
     }
     this.stateChanged.raiseEvent(this.active);
   }
@@ -183,11 +203,14 @@ class SwipeElement {
   onSwipingListener(movement) {
     if (this.swipeActive) {
       const relativeOffset = movement.endPosition.x;
-      const splitPosition = (this.element.offsetLeft + relativeOffset) /
+      const splitPosition =
+        (this.element.offsetLeft + relativeOffset) /
         this.element.parentElement.offsetWidth;
       if (splitPosition > 0.01 && splitPosition < 0.99) {
         this.mapCollection.splitPosition = splitPosition;
-        this.element.style.left = `${100.0 * this.mapCollection.splitPosition}%`;
+        this.element.style.left = `${
+          100.0 * this.mapCollection.splitPosition
+        }%`;
         this.positionChanged.raiseEvent(splitPosition);
       }
     }

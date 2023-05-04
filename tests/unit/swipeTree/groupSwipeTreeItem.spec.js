@@ -1,10 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-} from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { VcsUiApp } from '@vcmap/ui';
 import GroupSwipeTreeItem from '../../../src/swipeTree/groupSwipeTreeItem.js';
 import SwipeTreeItem from '../../../src/swipeTree/swipeTreeItem.js';
@@ -24,7 +18,7 @@ describe('GroupSwipeTreeItem', () => {
       new SwipeTreeItem({ name: 'foo.bar' }, app),
     ];
 
-    childrenArray.push(...children.map(c => c.getTreeViewItem()));
+    childrenArray.push(...children.map((c) => c.getTreeViewItem()));
 
     return { item, children };
   }
@@ -45,12 +39,16 @@ describe('GroupSwipeTreeItem', () => {
 
     beforeAll(() => {
       ({ item, children } = setupGroupItem());
-      children.forEach((c) => { c.visible = false; });
+      children.forEach((c) => {
+        c.visible = false;
+      });
     });
 
     afterAll(() => {
       item.destroy();
-      children.forEach((c) => { c.destroy(); });
+      children.forEach((c) => {
+        c.destroy();
+      });
     });
 
     it('should be visible, if a single child is visible', async () => {
@@ -60,7 +58,9 @@ describe('GroupSwipeTreeItem', () => {
     });
 
     it('should be invisible, if all children are not visible', async () => {
-      children.forEach((c) => { c.visible = false; });
+      children.forEach((c) => {
+        c.visible = false;
+      });
       await sleep();
       expect(item.visible).to.be.false;
     });
@@ -72,38 +72,70 @@ describe('GroupSwipeTreeItem', () => {
 
     beforeAll(() => {
       ({ item, children } = setupGroupItem());
-      children.forEach((c) => { c.splitState = { left: SplitActionState.ACTIVE, right: SplitActionState.ACTIVE }; });
+      children.forEach((c) => {
+        c.splitState = {
+          left: SplitActionState.ACTIVE,
+          right: SplitActionState.ACTIVE,
+        };
+      });
     });
 
     afterAll(() => {
       item.destroy();
-      children.forEach((c) => { c.destroy(); });
+      children.forEach((c) => {
+        c.destroy();
+      });
     });
 
     it('should have a split state of left/ right ACTIVE, if all items have a state of left/right ACTIVE', async () => {
-      const splitState = { left: SplitActionState.ACTIVE, right: SplitActionState.ACTIVE };
-      children.forEach((c) => { c.splitState = splitState; });
+      const splitState = {
+        left: SplitActionState.ACTIVE,
+        right: SplitActionState.ACTIVE,
+      };
+      children.forEach((c) => {
+        c.splitState = splitState;
+      });
       await sleep();
       expect(item.splitState.left.value).to.equal(SplitActionState.ACTIVE);
       expect(item.splitState.right.value).to.equal(SplitActionState.ACTIVE);
     });
 
     it('should have a split state of left/right INACTIVE, if all items have a state of left/right INACTIVE', async () => {
-      const splitState = { left: SplitActionState.INACTIVE, right: SplitActionState.INACTIVE };
-      children.forEach((c) => { c.splitState = splitState; });
+      const splitState = {
+        left: SplitActionState.INACTIVE,
+        right: SplitActionState.INACTIVE,
+      };
+      children.forEach((c) => {
+        c.splitState = splitState;
+      });
       await sleep();
       expect(item.splitState.left.value).to.equal(SplitActionState.INACTIVE);
       expect(item.splitState.right.value).to.equal(SplitActionState.INACTIVE);
     });
 
     it('should have a split state of INDETERMINATE, if items left/right have differing states', async () => {
-      const splitState = { left: SplitActionState.ACTIVE, right: SplitActionState.ACTIVE };
-      children.forEach((c) => { c.splitState = splitState; });
-      children[0].splitState = { left: SplitActionState.INACTIVE, right: SplitActionState.INACTIVE };
-      children[1].splitState = { left: SplitActionState.INACTIVE, right: SplitActionState.INACTIVE };
+      const splitState = {
+        left: SplitActionState.ACTIVE,
+        right: SplitActionState.ACTIVE,
+      };
+      children.forEach((c) => {
+        c.splitState = splitState;
+      });
+      children[0].splitState = {
+        left: SplitActionState.INACTIVE,
+        right: SplitActionState.INACTIVE,
+      };
+      children[1].splitState = {
+        left: SplitActionState.INACTIVE,
+        right: SplitActionState.INACTIVE,
+      };
       await sleep();
-      expect(item.splitState.left.value).to.equal(SplitActionState.INDETERMINATE);
-      expect(item.splitState.right.value).to.equal(SplitActionState.INDETERMINATE);
+      expect(item.splitState.left.value).to.equal(
+        SplitActionState.INDETERMINATE,
+      );
+      expect(item.splitState.right.value).to.equal(
+        SplitActionState.INDETERMINATE,
+      );
     });
   });
 });

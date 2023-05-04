@@ -1,5 +1,10 @@
 import { SplitDirection } from '@vcmap-cesium/engine';
-import { createSplitStateRefActions, getSplitStateFromLayer, SplitActionState, toggle } from './layerSwipeTreeItem.js';
+import {
+  createSplitStateRefActions,
+  getSplitStateFromLayer,
+  SplitActionState,
+  toggle,
+} from './layerSwipeTreeItem.js';
 import SwipeTreeItem from './swipeTreeItem.js';
 
 /**
@@ -8,10 +13,10 @@ import SwipeTreeItem from './swipeTreeItem.js';
  * @returns {SplitActionState}
  */
 export function getGroupStateForSide(states, side) {
-  if (states.every(s => s[side] === SplitActionState.ACTIVE)) {
+  if (states.every((s) => s[side] === SplitActionState.ACTIVE)) {
     return SplitActionState.ACTIVE;
   }
-  if (states.every(s => s[side] === SplitActionState.INACTIVE)) {
+  if (states.every((s) => s[side] === SplitActionState.INACTIVE)) {
     return SplitActionState.INACTIVE;
   }
   return SplitActionState.INDETERMINATE;
@@ -22,7 +27,10 @@ export function getGroupStateForSide(states, side) {
  * @returns {SplitActionStateObject}
  */
 export function getGroupStates(states) {
-  return { left: getGroupStateForSide(states, 'left'), right: getGroupStateForSide(states, 'right') };
+  return {
+    left: getGroupStateForSide(states, 'left'),
+    right: getGroupStateForSide(states, 'right'),
+  };
 }
 
 /**
@@ -30,7 +38,7 @@ export function getGroupStates(states) {
  * @returns {SplitActionStateObject}
  */
 export function getSplitStateFromLayers(layers) {
-  return getGroupStates(layers.map(l => getSplitStateFromLayer(l)));
+  return getGroupStates(layers.map((l) => getSplitStateFromLayer(l)));
 }
 
 /**
@@ -42,7 +50,9 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
   /**
    * @returns {string}
    */
-  static get className() { return 'LayerGroupSwipeTreeItem'; }
+  static get className() {
+    return 'LayerGroupSwipeTreeItem';
+  }
 
   /**
    * @param {import("@vcmap/ui").LayerGroupContentTreeItemOptions} options
@@ -54,15 +64,14 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
      * @type {Array<string>}
      * @private
      */
-    this._layerNames = Array.isArray(options.layerNames) ?
-      options.layerNames.slice() :
-      [];
+    this._layerNames = Array.isArray(options.layerNames)
+      ? options.layerNames.slice()
+      : [];
     /**
      * @type {Array<Function>}
      * @private
      */
     this._listeners = [];
-
 
     this._setup();
   }
@@ -73,9 +82,9 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
    */
   get _layers() {
     return this._layerNames
-      .map(n => this._app.layers.getByKey(n))
-      .filter(l => l)
-      .filter(l => l.splitDirection !== undefined);
+      .map((n) => this._app.layers.getByKey(n))
+      .filter((l) => l)
+      .filter((l) => l.splitDirection !== undefined);
   }
 
   /**
@@ -90,18 +99,24 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
         .filter((layer) => {
           const splitState = getSplitStateFromLayer(layer);
           if (dir === SplitDirection.LEFT) {
-            const active = this.splitState.left.value === SplitActionState.ACTIVE;
-            return active ? splitState.left === SplitActionState.ACTIVE : splitState.left !== SplitActionState.ACTIVE;
+            const active =
+              this.splitState.left.value === SplitActionState.ACTIVE;
+            return active
+              ? splitState.left === SplitActionState.ACTIVE
+              : splitState.left !== SplitActionState.ACTIVE;
           } else if (dir === SplitDirection.RIGHT) {
-            const active = this.splitState.right.value === SplitActionState.ACTIVE;
-            return active ? splitState.right === SplitActionState.ACTIVE : splitState.right !== SplitActionState.ACTIVE;
+            const active =
+              this.splitState.right.value === SplitActionState.ACTIVE;
+            return active
+              ? splitState.right === SplitActionState.ACTIVE
+              : splitState.right !== SplitActionState.ACTIVE;
           }
           return false;
         })
-        .forEach(layer => toggle(this._app.maps.layerCollection, layer, dir));
+        .forEach((layer) => toggle(this._app.maps.layerCollection, layer, dir));
     };
     const actions = createSplitStateRefActions(this._splitState, cb);
-    actions.forEach(a => this.addAction(a));
+    actions.forEach((a) => this.addAction(a));
   }
 
   /**
@@ -120,23 +135,33 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
     };
     const layers = this._layers;
 
-    this.visible = layers.some(l => l.isSupported(this._app.maps.activeMap));
+    this.visible = layers.some((l) => l.isSupported(this._app.maps.activeMap));
     this._setSwipeActions();
 
-    this._listeners.push(this._app.layers.removed.addEventListener(resetHandler));
+    this._listeners.push(
+      this._app.layers.removed.addEventListener(resetHandler),
+    );
     this._listeners.push(this._app.layers.added.addEventListener(resetHandler));
 
-    this._listeners.push(this._app.maps.mapActivated.addEventListener(() => {
-      this.visible = !!layers.find(l => l.isSupported(this._app.maps.activeMap));
-    }));
+    this._listeners.push(
+      this._app.maps.mapActivated.addEventListener(() => {
+        this.visible = !!layers.find((l) =>
+          l.isSupported(this._app.maps.activeMap),
+        );
+      }),
+    );
 
     layers.forEach((layer) => {
-      this._listeners.push(layer.stateChanged.addEventListener(() => {
-        this.splitState = getSplitStateFromLayers(layers);
-      }));
-      this._listeners.push(layer.splitDirectionChanged.addEventListener(() => {
-        this.splitState = getSplitStateFromLayers(layers);
-      }));
+      this._listeners.push(
+        layer.stateChanged.addEventListener(() => {
+          this.splitState = getSplitStateFromLayers(layers);
+        }),
+      );
+      this._listeners.push(
+        layer.splitDirectionChanged.addEventListener(() => {
+          this.splitState = getSplitStateFromLayers(layers);
+        }),
+      );
     });
 
     this.splitState = getSplitStateFromLayers(layers);
@@ -146,7 +171,9 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
    * @private
    */
   _clearListeners() {
-    this._listeners.forEach((cb) => { cb(); });
+    this._listeners.forEach((cb) => {
+      cb();
+    });
     this._listeners.splice(0);
   }
 

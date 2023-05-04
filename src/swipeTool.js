@@ -12,7 +12,10 @@ import { SplitDirection } from '@vcmap-cesium/engine';
 import { VcsEvent } from '@vcmap/core';
 import SwipeElement from './swipeElement.js';
 import LayerSwipeTreeItem from './swipeTree/layerSwipeTreeItem.js';
-import { setupSwipeToolActions, setupSwipeToolActionsNoUI } from './actionHelper.js';
+import {
+  setupSwipeToolActions,
+  setupSwipeToolActionsNoUI,
+} from './actionHelper.js';
 import GroupSwipeTreeItem from './swipeTree/groupSwipeTreeItem.js';
 import LayerGroupSwipeTreeItem from './swipeTree/layerGroupSwipeTreeItem.js';
 
@@ -48,7 +51,9 @@ export function parseSwipeLayerState(options) {
  * @api
  */
 class SwipeTool {
-  static get className() { return 'SwipeTool'; }
+  static get className() {
+    return 'SwipeTool';
+  }
 
   /**
    * Returns the default options for this Widget
@@ -86,22 +91,32 @@ class SwipeTool {
      * @type {number}
      * @private
      */
-    this._splitPosition = parseNumber(options.splitPosition, SwipeTool.getDefaultOptions().splitPosition);
+    this._splitPosition = parseNumber(
+      options.splitPosition,
+      SwipeTool.getDefaultOptions().splitPosition,
+    );
     /**
      * @type {boolean}
      * @private
      */
-    this._showSwipeTree = parseBoolean(options.showSwipeTree, defaultOptions.showSwipeTree);
+    this._showSwipeTree = parseBoolean(
+      options.showSwipeTree,
+      defaultOptions.showSwipeTree,
+    );
     /**
      * @type {boolean}
      * @private
      */
-    this._showSwipeElement = parseBoolean(options.showSwipeElement, defaultOptions.showSwipeElement);
+    this._showSwipeElement = parseBoolean(
+      options.showSwipeElement,
+      defaultOptions.showSwipeElement,
+    );
     /**
      * @type {Object<string, string>|undefined}
      * @private
      */
-    this._swipeElementTitles = options.swipeElementTitles || defaultOptions.swipeElementTitles;
+    this._swipeElementTitles =
+      options.swipeElementTitles || defaultOptions.swipeElementTitles;
     /**
      * @type {SwipeElement}
      * @private
@@ -113,9 +128,12 @@ class SwipeTool {
      */
     this._cachedState = {};
     if (options.swipeLayerStates) {
-      Object.entries(options.swipeLayerStates).forEach(([layerName, swipeLayerOptions]) => {
-        this._cachedState[layerName] = parseSwipeLayerState(swipeLayerOptions);
-      });
+      Object.entries(options.swipeLayerStates).forEach(
+        ([layerName, swipeLayerOptions]) => {
+          this._cachedState[layerName] =
+            parseSwipeLayerState(swipeLayerOptions);
+        },
+      );
     }
     /**
      * @type {Object<string,SwipeLayerState>}
@@ -140,7 +158,7 @@ class SwipeTool {
     this._listeners = [
       app.contentTree.added.addEventListener(this.handleItemAdded.bind(this)),
       app.contentTree.removed.addEventListener(this.setTreeView.bind(this)),
-      app.contextAdded.addEventListener(this.setTreeView.bind(this)),
+      app.moduleAdded.addEventListener(this.setTreeView.bind(this)),
       this._swipeElement.positionChanged.addEventListener((position) => {
         this._splitPosition = position;
       }),
@@ -149,8 +167,9 @@ class SwipeTool {
      * @type {function(): void}
      * @private
      */
-    this._destroyActions = this._showSwipeTree ?
-      setupSwipeToolActions(this._app, this) : setupSwipeToolActionsNoUI(this._app, this);
+    this._destroyActions = this._showSwipeTree
+      ? setupSwipeToolActions(this._app, this)
+      : setupSwipeToolActionsNoUI(this._app, this);
   }
 
   /**
@@ -216,8 +235,9 @@ class SwipeTool {
     check(value, Boolean);
     this._showSwipeTree = value;
     this._destroyActions();
-    this._destroyActions = this._showSwipeTree ?
-      setupSwipeToolActions(this._app, this) : setupSwipeToolActionsNoUI(this._app, this);
+    this._destroyActions = this._showSwipeTree
+      ? setupSwipeToolActions(this._app, this)
+      : setupSwipeToolActionsNoUI(this._app, this);
   }
 
   /**
@@ -293,15 +313,15 @@ class SwipeTool {
    */
   _handleChildren(mappedItem, item, contentTree) {
     mappedItem.getTreeViewItem().children = item.children
-      .map(c => this._mapTreeItems(c, contentTree))
-      .filter(c => !!c);
+      .map((c) => this._mapTreeItems(c, contentTree))
+      .filter((c) => !!c);
     if (!(mappedItem instanceof NodeContentTreeItem)) {
       mappedItem.getTreeViewItem().clickable = false;
     }
     const actionsToRemove = mappedItem.actions
-      .map(a => a.name)
-      .filter(name => name !== 'split-right' && name !== 'split-left');
-    actionsToRemove.forEach(name => mappedItem.removeAction(name));
+      .map((a) => a.name)
+      .filter((name) => name !== 'split-right' && name !== 'split-left');
+    actionsToRemove.forEach((name) => mappedItem.removeAction(name));
     return mappedItem.getTreeViewItem();
   }
 
@@ -345,15 +365,24 @@ class SwipeTool {
   setTreeView() {
     this._clearSwipeTree();
     if (this._active && this._showSwipeTree) {
-      [...this._app.contentTree.subTreeViewItems.value.values()].forEach((subTree, idx) => {
-        const { name, title, tooltip, icon } = subTree;
-        const mappedItem = new SubContentTreeItem({ name, title, tooltip, icon }, this._app);
-        const swipeSubTree = this._handleChildren(mappedItem, subTree, this._app.contentTree);
+      [...this._app.contentTree.subTreeViewItems.value.values()].forEach(
+        (subTree, idx) => {
+          const { name, title, tooltip, icon } = subTree;
+          const mappedItem = new SubContentTreeItem(
+            { name, title, tooltip, icon },
+            this._app,
+          );
+          const swipeSubTree = this._handleChildren(
+            mappedItem,
+            subTree,
+            this._app.contentTree,
+          );
 
-        const id = this._app.contentTree.subTreeIds[idx];
-        this._subTreeViewItems.set(id, swipeSubTree);
-        this._subTreeIds.value.push(id);
-      });
+          const id = this._app.contentTree.subTreeIds[idx];
+          this._subTreeViewItems.set(id, swipeSubTree);
+          this._subTreeIds.value.push(id);
+        },
+      );
       // XXX other sources of swipe layers?
     }
   }
@@ -411,7 +440,10 @@ class SwipeTool {
         return options.layerName || options.layerNames || [];
       })
       .flat()
-      .filter(layerName => this._app.layers.getByKey(layerName)?.splitDirection !== undefined)
+      .filter(
+        (layerName) =>
+          this._app.layers.getByKey(layerName)?.splitDirection !== undefined,
+      )
       .map((name) => {
         const { active, splitDirection } = this._app.layers.getByKey(name);
         return [name, { active, splitDirection }];
@@ -495,7 +527,10 @@ class SwipeTool {
     if (this._splitPosition !== defaultOptions.splitPosition) {
       config.splitPosition = this._splitPosition;
     }
-    if (JSON.stringify(this.swipeElementTitles) !== JSON.stringify(defaultOptions.swipeElementTitles)) {
+    if (
+      JSON.stringify(this.swipeElementTitles) !==
+      JSON.stringify(defaultOptions.swipeElementTitles)
+    ) {
       config.swipeElementTitles = this.swipeElementTitles;
     }
 
@@ -505,7 +540,7 @@ class SwipeTool {
   destroy() {
     this.clear();
     this.stateChanged.destroy();
-    this._listeners.forEach(cb => cb());
+    this._listeners.forEach((cb) => cb());
     if (this._destroyActions) {
       this._destroyActions();
     }

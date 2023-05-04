@@ -1,12 +1,18 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
-import commonViteConfig from '@vcmap/ui/build/commonViteConfig.js'
+import commonViteConfig from '@vcmap/ui/build/commonViteConfig.js';
 import path from 'path';
 
 const configTest = defineConfig({
   ...commonViteConfig,
   resolve: {
     alias: {
-      '@vcmap/ui': `${path.resolve(process.cwd(), 'node_modules', '@vcmap', 'ui')}`,
+      '@vcmap/ui': `${path.resolve(
+        process.cwd(),
+        'node_modules',
+        '@vcmap',
+        'ui',
+      )}`,
       vue: 'vue/dist/vue.esm.js',
       tinyqueue: 'tinyqueue/tinyqueue.js',
     },

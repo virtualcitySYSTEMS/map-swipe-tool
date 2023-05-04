@@ -36,9 +36,15 @@ export default function splitView(config) {
   let listener;
 
   return {
-    get name() { return name; },
-    get version() { return version; },
-    get swipeTool() { return swipeTool; },
+    get name() {
+      return name;
+    },
+    get version() {
+      return version;
+    },
+    get swipeTool() {
+      return swipeTool;
+    },
     /**
      * @param {import("@vcmap/ui").VcsUiApp} app
      * @param {SwipeToolState=} state
@@ -93,7 +99,8 @@ export default function splitView(config) {
           hideController: 'Hide Split View Controller',
           showController: 'Show Split View Controller',
           treeTitle: 'L | R',
-          emptyTree: 'Activate Swipe Tool to show available layers to be split.',
+          emptyTree:
+            'Activate Swipe Tool to show available layers to be split.',
           stateActionTitles: {
             inactiveLeft: 'Show layer to the left',
             inactiveRight: 'Show layer to the right',
@@ -115,7 +122,8 @@ export default function splitView(config) {
           hideController: 'Split View Regler ausblenden',
           showController: 'Split View Regler anzeigen',
           treeTitle: 'L | R',
-          emptyTree: 'Aktivieren Sie das Swipe Tool um die verfügbaren Split Layer anzuzeigen.',
+          emptyTree:
+            'Aktivieren Sie das Swipe Tool um die verfügbaren Split Layer anzuzeigen.',
           stateActionTitles: {
             inactiveLeft: 'Ebene links anzeigen',
             inactiveRight: 'Ebene rechts anzeigen',

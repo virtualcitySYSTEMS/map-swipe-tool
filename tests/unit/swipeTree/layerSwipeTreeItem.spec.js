@@ -2,7 +2,9 @@ import { ObliqueMap, OpenlayersMap, VectorLayer } from '@vcmap/core';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { VcsUiApp } from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
-import LayerSwipeTreeItem, { SplitActionState } from '../../../src/swipeTree/layerSwipeTreeItem.js';
+import LayerSwipeTreeItem, {
+  SplitActionState,
+} from '../../../src/swipeTree/layerSwipeTreeItem.js';
 
 describe('LayerContentTreeItem', () => {
   describe('if there is a layer', () => {
@@ -18,9 +20,13 @@ describe('LayerContentTreeItem', () => {
       await app.maps.setActiveMap('ol');
       layer = new VectorLayer({ mapNames: ['ol'] });
       app.layers.add(layer);
-      item = new LayerSwipeTreeItem({
-        name: 'foo', layerName: layer.name,
-      }, app);
+      item = new LayerSwipeTreeItem(
+        {
+          name: 'foo',
+          layerName: layer.name,
+        },
+        app,
+      );
     });
 
     afterAll(() => {
@@ -103,7 +109,10 @@ describe('LayerContentTreeItem', () => {
   describe('if layer is not present', () => {
     it('should not be visible', () => {
       const app = new VcsUiApp();
-      const item = new LayerSwipeTreeItem({ name: 'foo', layerName: 'foo' }, app);
+      const item = new LayerSwipeTreeItem(
+        { name: 'foo', layerName: 'foo' },
+        app,
+      );
       expect(item.visible).to.be.false;
       item.destroy();
       app.destroy();
@@ -113,7 +122,10 @@ describe('LayerContentTreeItem', () => {
   describe('serialize', () => {
     it('should serialize name, type and layerName', () => {
       const app = new VcsUiApp();
-      const item = new LayerSwipeTreeItem({ name: 'foo', layerName: 'foo' }, app);
+      const item = new LayerSwipeTreeItem(
+        { name: 'foo', layerName: 'foo' },
+        app,
+      );
       const config = item.toJSON();
       expect(config).to.have.all.keys(['name', 'type', 'layerName']);
       item.destroy();

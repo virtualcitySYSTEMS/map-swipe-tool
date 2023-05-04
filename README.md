@@ -11,13 +11,16 @@ Its activation button is located within the toolbar.
 Depending on its configuration the behaviour of the swipe tool button differs.
 
 ### a) Simple Swipe Tool
+
 If `showSwipeTree` is configured to `false`, the button shows on activation the Swipe Controller and applies the configured `swipeLayerStates`.
 Moving the Swipe Controller a user can interactively compare two predefined states of an object or scene.
 Clicking the tool button again, hides the Swipe Controller and resets the original state.
 
 ### b) Extended Swipe Tool with Swipe TreeView Window
+
 Per default, on activation a Window with a swipe tree opens, where the user can interactively apply states on available layers.
 The swipe tree is derived from the content tree mapping the structure and items to SwipeTreeItems with two actions:
+
 - split left, to show or hide the layer on the left side
 - split right, to show or hide the layer on the right side
 
@@ -29,7 +32,7 @@ Clicking the Swipe Tool button in active state, closes the window. It doesn't de
 The `SwipeToolConfig` contains the following options:
 
 | property           | type                                          | default   | description                                                         |
-|--------------------|-----------------------------------------------|-----------|---------------------------------------------------------------------|
+| ------------------ | --------------------------------------------- | --------- | ------------------------------------------------------------------- |
 | showSwipeTree      | boolean                                       | true      | Whether Swipe Tree is shown on tool activation.                     |
 | showSwipeElement   | boolean                                       | true      | Whether to show or hide Swipe Controller on activation.             |
 | swipeElementTitles | Object<string,string>&vert;undefined          | undefined | An object with keys 'left' and 'right' containing titles.           |
@@ -41,11 +44,12 @@ If no values are provided or after deactivation and reactivation the current sta
 The configuration is done with the following options:
 
 | property       | type    | description                                                                             |
-|----------------|---------|-----------------------------------------------------------------------------------------|
+| -------------- | ------- | --------------------------------------------------------------------------------------- |
 | splitDirection | string  | The split direction of the layer. Either 'left' or 'right', if omitted none is applied. |
 | active         | boolean | The active state of the layer.                                                          |
 
 A config entry could for example look like:
+
 ```json
 {
   "name": "@vcmap/swipe-tool",
@@ -68,6 +72,7 @@ A config entry could for example look like:
 
 The Swipe Tool plugin can be accessed via the `VcsUiApp`.
 It's provided on the plugin by a getter:
+
 ```js
 const { swipeTool } = vcsUiApp.plugins.getByKey('@vcmap/swipe-tool');
 ```
@@ -75,11 +80,13 @@ const { swipeTool } = vcsUiApp.plugins.getByKey('@vcmap/swipe-tool');
 ### Activation and deactivation
 
 To activate the swipeTool via API call:
+
 ```js
 swipeTool.activate();
 ```
 
 To deactivate the swipeTool via API call:
+
 ```js
 swipeTool.deactivate();
 ```
@@ -87,17 +94,20 @@ swipeTool.deactivate();
 ### Change configuration (tree view, titles)
 
 To toggle whether the tree view is shown or not use:
+
 ```js
 swipeTool.showSwipeTree = true; // or false
 ```
+
 The setter will trigger a new setup of the swipe tool actions.
 
 To update the `swipeElementTitles` use:
+
 ```js
 swipeTool.swipeElementTitles = {
   left: 'My new left title',
   right: 'My new right title',
-}
+};
 ```
 
 ### Adding or removing swipe layers
@@ -108,32 +118,41 @@ The swipe tree is automatically derived from the content tree and will be update
 ### Swipe Tool State
 
 The swipe tool has to private properties for state:
+
 - `_initialState` is cached on activation and applied on deactivation.
-- `_cachedState` is the tool's internal state. It is updated on deactivation or whenever `setState` is called. 
+- `_cachedState` is the tool's internal state. It is updated on deactivation or whenever `setState` is called.
 
 Methods to work with the state:
 
 #### getState
+
 ```js
 const currentState = swipeTool.getState();
 ```
+
 Iterates over content tree collection and returns current SwipeLayerState for all layers of LayerContentTreeItem and LayerGroupContentTreeItem.
 
 #### setState
+
 ```js
-swipeTool.setState({ 'layerName': { active: true, splitDirection: -1 } });
+swipeTool.setState({ layerName: { active: true, splitDirection: -1 } });
 ```
+
 Sets a new state and applies it, if the tool is active.
 
 #### applyState
+
 ```js
-swipeTool.applyState({ 'layerName': { active: true, splitDirection: -1 } });
+swipeTool.applyState({ layerName: { active: true, splitDirection: -1 } });
 ```
+
 Applies the provided state to all referenced layers, if the tool is active.
 
 #### clear
+
 ```js
 swipeTool.clear();
 ```
+
 Clearing the swipe tool removes all items from the tree view, if present, and resets the initial swipe state on all swipe layers.
 It also clears cached states of `_cachedState` and `_initialState`.

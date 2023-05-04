@@ -11,7 +11,10 @@
     "start": "vcmplugin serve",
     "preview": "vcmplugin preview",
     "buildStagingApp": "vcmplugin buildStagingApp",
-    "lint": "eslint \"{src,tests}/**/*.{js,vue}\"",
+    "lint:js": "eslint . --ext .vue,.js,.cjs,.mjs,.ts,.cts,.mts",
+    "lint:prettier": "prettier --check .",
+    "lint": "npm run lint:js && npm run lint:prettier",
+    "format": "prettier --write --list-different . && npm run lint:js -- --fix",
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "coverage:gitlab": "vitest run --coverage --reporter junit --outputFile test-report.xml"
@@ -34,14 +37,14 @@
     "./dist": "./dist/index.js"
   },
   "eslintIgnore": [
-    "node_modules"
+    "node_modules",
+    "dist",
+    "coverage",
+    "*timestamp-*.mjs"
   ],
   "eslintConfig": {
     "root": true,
-    "extends": "@vcsuite/eslint-config/vue",
-    "rules": {
-      "jsdoc/check-tag-names": "off"
-    }
+    "extends": "@vcsuite/eslint-config/vue"
   },
   "dependencies": {
     "@vcsuite/check": "^1.1.2",
@@ -50,20 +53,22 @@
     "uuid": "^8.3.2"
   },
   "peerDependencies": {
-    "@vcmap-cesium/engine": "~1.1.2",
-    "@vcmap/core": "~5.0.0-rc.27",
-    "@vcmap/ui": "^5.0.0-rc.22",
-    "@vitest/coverage-c8": "^0.24.5",
-    "jest-canvas-mock": "^2.4.0",
-    "jsdom": "^20.0.2",
-    "vite": "^3.2.2",
-    "vitest": "^0.24.5",
+    "@vcmap-cesium/engine": "~2.3.1",
+    "@vcmap/core": "^5.0.0-rc.31",
+    "@vcmap/ui": "^5.0.0-rc.24",
     "vue": "~2.7.3",
     "vuetify": "~2.6.7"
   },
   "devDependencies": {
-    "@vcmap/plugin-cli": "^2.1.4",
-    "@vcsuite/eslint-config": "^2.1.1",
-    "resize-observer-polyfill": "1.5.1"
-  }
+    "@vcmap/plugin-cli": "^2.1.8",
+    "@vcsuite/eslint-config": "^3.0.3",
+    "@vitest/coverage-c8": "^0.24.5",
+    "jest-canvas-mock": "^2.4.0",
+    "jsdom": "^20.0.2",
+    "prettier": "^2.8.8",
+    "resize-observer-polyfill": "^1.5.1",
+    "vite": "^4.3.4",
+    "vitest": "^0.24.5"
+  },
+  "prettier": "@vcsuite/eslint-config/prettier.js"
 }

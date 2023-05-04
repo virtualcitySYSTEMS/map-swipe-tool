@@ -1,4 +1,5 @@
 import { ToolboxType, WindowSlot } from '@vcmap/ui';
+import { ObliqueMap } from '@vcmap/core';
 import { reactive } from 'vue';
 import SwipeToolComponent from './swipeToolComponent.vue';
 import { name as pluginName } from '../package.json';
@@ -53,7 +54,8 @@ function createSwipeElementAction(swipeElement) {
  * @returns {function():void}
  */
 export function setupSwipeToolActions(app, swipeTool) {
-  const { action: swipeElementAction, destroy: swipeElementDestroy } = createSwipeElementAction(swipeTool.swipeElement);
+  const { action: swipeElementAction, destroy: swipeElementDestroy } =
+    createSwipeElementAction(swipeTool.swipeElement);
   /**
    *
    * @type {import("@vcmap/ui").WindowComponentOptions}
@@ -76,6 +78,7 @@ export function setupSwipeToolActions(app, swipeTool) {
     icon: '$vcsSplitView',
     active: false,
     background: false,
+    disabled: false,
     callback() {
       if (this.active) {
         if (this.background) {
@@ -114,6 +117,15 @@ export function setupSwipeToolActions(app, swipeTool) {
       action.active = active;
       action.title = getToggleTitle(action);
     }),
+    app.maps.mapActivated.addEventListener((map) => {
+      if (map instanceof ObliqueMap) {
+        swipeTool.deactivate();
+        app.windowManager.remove(windowComponent.id);
+        action.disabled = true;
+      } else {
+        action.disabled = false;
+      }
+    }),
   ];
 
   if (app.toolboxManager.has(pluginName)) {
@@ -138,7 +150,7 @@ export function setupSwipeToolActions(app, swipeTool) {
     if (swipeElementDestroy) {
       swipeElementDestroy();
     }
-    listeners.forEach(cb => cb());
+    listeners.forEach((cb) => cb());
   };
 
   return destroy;
