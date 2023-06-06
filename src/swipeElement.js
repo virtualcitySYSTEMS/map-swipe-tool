@@ -141,7 +141,9 @@ class SwipeElement {
   activate() {
     if (!this.active) {
       this._addElementToMap();
-      this.element.style.left = `${100.0 * this.mapCollection.splitPosition}%`;
+      this.element.style.left = `calc(${
+        100.0 * this.mapCollection.splitPosition
+      }% - 2px)`;
       this.swipeEventHandler.setInputAction(() => {
         this.swipeActive = true;
       }, ScreenSpaceEventType.LEFT_DOWN);
@@ -208,9 +210,9 @@ class SwipeElement {
         this.element.parentElement.offsetWidth;
       if (splitPosition > 0.01 && splitPosition < 0.99) {
         this.mapCollection.splitPosition = splitPosition;
-        this.element.style.left = `${
+        this.element.style.left = `calc(${
           100.0 * this.mapCollection.splitPosition
-        }%`;
+        }% - 2px)`;
         this.positionChanged.raiseEvent(splitPosition);
       }
     }

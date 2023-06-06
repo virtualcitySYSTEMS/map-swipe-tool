@@ -49,26 +49,25 @@
   "dependencies": {
     "@vcsuite/check": "^1.1.2",
     "@vcsuite/logger": "^1.0.1",
-    "@vcsuite/parsers": "^1.0.1",
-    "uuid": "^8.3.2"
+    "@vcsuite/parsers": "^1.0.3",
+    "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@vcmap-cesium/engine": "~2.3.1",
-    "@vcmap/core": "^5.0.0-rc.31",
-    "@vcmap/ui": "^5.0.0-rc.24",
+    "@vcmap-cesium/engine": "~2.4.1",
+    "@vcmap/core": "^5.0.0-rc.35",
+    "@vcmap/ui": "^5.0.0-rc.25",
     "vue": "~2.7.3",
     "vuetify": "~2.6.7"
   },
   "devDependencies": {
-    "@vcmap/plugin-cli": "^2.1.8",
+    "@vcmap/plugin-cli": "^2.1.9",
     "@vcsuite/eslint-config": "^3.0.3",
-    "@vitest/coverage-c8": "^0.24.5",
+    "@vitest/coverage-c8": "^0.31.1",
     "jest-canvas-mock": "^2.4.0",
-    "jsdom": "^20.0.2",
+    "jsdom": "^21.1.1",
     "prettier": "^2.8.8",
     "resize-observer-polyfill": "^1.5.1",
-    "vite": "^4.3.4",
-    "vitest": "^0.24.5"
+    "vitest": "^0.31.0"
   },
   "prettier": "@vcsuite/eslint-config/prettier.js"
 }

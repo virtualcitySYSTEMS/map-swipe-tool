@@ -1,3 +1,8 @@
+# v1.0.7
+
+- Fixed testRunner
+- Fixed Slider Position, now offset by 2px
+
 # v1.0.0
 
-Document features and fixes
+Swipe Tool
