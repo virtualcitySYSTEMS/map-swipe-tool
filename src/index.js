@@ -92,22 +92,21 @@ export default function splitView(config) {
         swipeTool: {
           title: 'Swipe Tool',
           toolStateTitles: {
-            activate: 'Activate Swipe Tool',
-            deactivate: 'Deactivate Swipe Tool',
+            activate: 'Enable Swipe Tool',
+            deactivate: 'Disable Swipe Tool',
             open: 'Open Swipe Tool window',
           },
-          hideController: 'Hide Split View Controller',
-          showController: 'Show Split View Controller',
+          hideController: 'Hide split view control',
+          showController: 'Show split view control',
           treeTitle: 'L | R',
-          emptyTree:
-            'Activate Swipe Tool to show available layers to be split.',
+          emptyTree: 'Enable Swipe Tool to show available layers to be split.',
           stateActionTitles: {
-            inactiveLeft: 'Show layer to the left',
-            inactiveRight: 'Show layer to the right',
-            activeLeft: 'Hide layer to the left',
-            activeRight: 'Hide layer to the right',
-            indeterminateLeft: 'Show all layers to the left',
-            indeterminateRight: 'Show all layers to the right',
+            inactiveLeft: 'Show layer on the left side',
+            inactiveRight: 'Show layer on the right side',
+            activeLeft: 'Hide layer on the left side',
+            activeRight: 'Hide layer on the right side',
+            indeterminateLeft: 'Show all layers on the left side',
+            indeterminateRight: 'Show all layers on the right side',
           },
         },
       },
@@ -123,7 +122,7 @@ export default function splitView(config) {
           showController: 'Split View Regler anzeigen',
           treeTitle: 'L | R',
           emptyTree:
-            'Aktivieren Sie das Swipe Tool um die verfügbaren Split Layer anzuzeigen.',
+            'Aktivieren Sie das Swipe Tool, um die verfügbaren Ebenen anzuzeigen.',
           stateActionTitles: {
             inactiveLeft: 'Ebene links anzeigen',
             inactiveRight: 'Ebene rechts anzeigen',
