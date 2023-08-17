@@ -68,7 +68,7 @@ export function setupSwipeToolActions(app, swipeTool) {
       headerTitle: 'swipeTool.title',
       headerIcon: '$vcsSplitView',
       headerActions: [swipeElementAction],
-      // infoUrl: 'https://vc.systems',
+      infoUrlCallback: app.getHelpUrlCallback('/tools/swipeTool.html'),
     },
   };
 
@@ -140,7 +140,7 @@ export function setupSwipeToolActions(app, swipeTool) {
     pluginName,
   );
 
-  const destroy = () => {
+  return () => {
     if (app.toolboxManager.has(pluginName)) {
       app.toolboxManager.remove(pluginName);
     }
@@ -152,8 +152,6 @@ export function setupSwipeToolActions(app, swipeTool) {
     }
     listeners.forEach((cb) => cb());
   };
-
-  return destroy;
 }
 
 /**
@@ -198,12 +196,10 @@ export function setupSwipeToolActionsNoUI(app, swipeTool) {
     pluginName,
   );
 
-  const destroy = () => {
+  return () => {
     if (app.toolboxManager.has(pluginName)) {
       app.toolboxManager.remove(pluginName);
     }
     listener();
   };
-
-  return destroy;
 }
