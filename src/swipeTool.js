@@ -16,6 +16,7 @@ import LayerSwipeTreeItem from './swipeTree/layerSwipeTreeItem.js';
 import {
   setupSwipeToolActions,
   setupSwipeToolActionsNoUI,
+  swipeWindowId,
 } from './actionHelper.js';
 import GroupSwipeTreeItem from './swipeTree/groupSwipeTreeItem.js';
 import LayerGroupSwipeTreeItem from './swipeTree/layerGroupSwipeTreeItem.js';
@@ -297,6 +298,9 @@ class SwipeTool {
     if (this._active) {
       this._splitPosition = this._app.maps.splitPosition;
       this._swipeElement.deactivate();
+      if (this._app.windowManager.has(swipeWindowId)) {
+        this._app.windowManager.remove(swipeWindowId);
+      }
       const state = this.getState();
       this.setState(state);
       this.applyState(this._initialState);

@@ -4,6 +4,8 @@ import { reactive } from 'vue';
 import SwipeToolComponent from './SwipeToolComponent.vue';
 import { name as pluginName } from '../package.json';
 
+export const swipeWindowId = 'swipe-tool-window';
+
 /**
  * @param {import("@vcmap/ui").VcsAction} action
  * @returns {string}
@@ -61,7 +63,7 @@ export function setupSwipeToolActions(app, swipeTool) {
    * @type {import("@vcmap/ui").WindowComponentOptions}
    */
   const windowComponent = {
-    id: 'swipe-tool-window',
+    id: swipeWindowId,
     component: SwipeToolComponent,
     slot: WindowSlot.DYNAMIC_LEFT,
     state: {
@@ -84,7 +86,7 @@ export function setupSwipeToolActions(app, swipeTool) {
         if (this.background) {
           return app.windowManager.add(windowComponent, pluginName);
         } else {
-          app.windowManager.remove(windowComponent.id);
+          app.windowManager.remove(swipeWindowId);
           swipeTool.deactivate();
           this.active = false;
         }
@@ -101,14 +103,14 @@ export function setupSwipeToolActions(app, swipeTool) {
 
   const listeners = [
     app.windowManager.added.addEventListener(({ id }) => {
-      if (id === windowComponent.id) {
+      if (id === swipeWindowId) {
         action.active = true;
         action.background = false;
         action.title = getToggleTitle(action);
       }
     }),
     app.windowManager.removed.addEventListener(({ id }) => {
-      if (id === windowComponent.id) {
+      if (id === swipeWindowId) {
         action.background = true;
         action.title = getToggleTitle(action);
       }
@@ -120,7 +122,7 @@ export function setupSwipeToolActions(app, swipeTool) {
     app.maps.mapActivated.addEventListener((map) => {
       if (map instanceof ObliqueMap) {
         swipeTool.deactivate();
-        app.windowManager.remove(windowComponent.id);
+        app.windowManager.remove(swipeWindowId);
         action.disabled = true;
       } else {
         action.disabled = false;
@@ -144,8 +146,8 @@ export function setupSwipeToolActions(app, swipeTool) {
     if (app.toolboxManager.has(pluginName)) {
       app.toolboxManager.remove(pluginName);
     }
-    if (app.windowManager.has(windowComponent.id)) {
-      app.windowManager.remove(windowComponent.id);
+    if (app.windowManager.has(swipeWindowId)) {
+      app.windowManager.remove(swipeWindowId);
     }
     if (swipeElementDestroy) {
       swipeElementDestroy();
