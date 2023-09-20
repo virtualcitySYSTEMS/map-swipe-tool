@@ -1,10 +1,17 @@
-import { version, name } from '../package.json';
+import { name, version, mapVersion } from '../package.json';
 import SwipeTool from './swipeTool.js';
+import SwipeToolConfigEditor from './SwipeToolConfigEditor.vue';
 
 /**
  * @typedef {Object} SwipeLayerOptions
  * @property {boolean} active
- * @property {string} splitDirection - either 'left' or 'right', if omitted none is applied
+ * @property {string} [splitDirection] - either 'left' or 'right', if omitted none is applied
+ */
+
+/**
+ * @typedef {Object} SwipeElementTitles
+ * @property {string} left
+ * @property {string} right
  */
 
 /**
@@ -12,7 +19,7 @@ import SwipeTool from './swipeTool.js';
  * @property {boolean} [showSwipeTree=true] - If true, show tree of swipe layers. If false, only provide toggle capabilities
  * @property {boolean} [showSwipeElement=true] - hide the swipe element
  * @property {number|undefined} [splitPosition] - the position between 0 and 1 to place the split at
- * @property {Object<string, string>|undefined} [swipeElementTitles] - an object with "left" and/or "right" keys representing string titles to be placed either side of the swipe element
+ * @property {SwipeElementTitles|undefined} [swipeElementTitles] - an object with "left" and/or "right" keys representing string titles to be placed either side of the swipe element
  * @property {Object<string,SwipeLayerOptions>} [swipeLayerStates] - the layers to activate, with a given swipe direction
  * @api
  */
@@ -42,8 +49,20 @@ export default function splitView(config) {
     get version() {
       return version;
     },
+    get mapVersion() {
+      return mapVersion;
+    },
     get swipeTool() {
       return swipeTool;
+    },
+    get active() {
+      return swipeTool?.active;
+    },
+    activate() {
+      swipeTool?.activate();
+    },
+    deactivate() {
+      swipeTool?.deactivate();
     },
     /**
      * @param {import("@vcmap/ui").VcsUiApp} app
@@ -77,6 +96,12 @@ export default function splitView(config) {
       return swipeTool.toJSON();
     },
     /**
+     * @returns {SwipeToolConfig}
+     */
+    getDefaultOptions() {
+      return SwipeTool.getDefaultOptions();
+    },
+    /**
      * should return the plugins state
      * @returns {SwipeToolState}
      */
@@ -86,6 +111,9 @@ export default function splitView(config) {
         splitPosition: swipeTool.splitPosition,
         swipeLayerStates: swipeTool.getState(),
       };
+    },
+    getConfigEditors() {
+      return [{ component: SwipeToolConfigEditor }];
     },
     i18n: {
       en: {
@@ -107,6 +135,26 @@ export default function splitView(config) {
             activeRight: 'Hide layer on the right side',
             indeterminateLeft: 'Show all layers on the left side',
             indeterminateRight: 'Show all layers on the right side',
+          },
+          swipeElementTitles: {
+            left: 'Left',
+            right: 'Right',
+          },
+          editor: {
+            general: 'General settings',
+            showSwipeTree: 'Enable swipe tool ui',
+            showSwipeElement: 'Show swipe element',
+            splitPosition: 'Initial split position',
+            swipeElementTitles: 'Swipe element titles',
+            swipeLayerStates: 'Swipe layer states',
+            swipeLayer: {
+              title: 'Define initial state for layers',
+              name: 'Select layer',
+              add: 'Add initial state',
+              remove: 'Remove initial state',
+              splitLeft: 'Toggle split left',
+              splitRight: 'Toggle split right',
+            },
           },
         },
       },
@@ -130,6 +178,26 @@ export default function splitView(config) {
             activeRight: 'Ebene rechts verstecken',
             indeterminateLeft: 'Alle Ebenen links anzeigen',
             indeterminateRight: 'Alle Ebenen rechts anzeigen',
+          },
+          swipeElementTitles: {
+            left: 'Links',
+            right: 'Rechts',
+          },
+          editor: {
+            general: 'Allgemeine Einstellungen',
+            showSwipeTree: 'Zeige Benutzeroberfläche',
+            showSwipeElement: 'Zeige Swipe Element',
+            splitPosition: 'Anfangssplitposition',
+            swipeElementTitles: 'Swipe Element Titel',
+            swipeLayerStates: 'Zustände der Ebenen',
+            swipeLayer: {
+              title: 'Definition von Anfangszuständen für Ebenen',
+              name: 'Ebene auswählen',
+              add: 'Anfangszustand hinzufügen',
+              remove: 'Anfangszustand entfernen',
+              splitLeft: 'Splitten links umschalten',
+              splitRight: 'Splitten rechts umschalten',
+            },
           },
         },
       },

@@ -27,16 +27,19 @@ The swipe tree is derived from the content tree mapping the structure and items 
 The Swipe Tool window offers additional header actions to hide the Swipe Controller, deactivate and reactivated the Swipe Tool and to view help.
 Clicking the Swipe Tool button in active state, closes the window. It doesn't deactivate the tool, though!
 
+> To make layers accessible within the swipe tree you have to add those layers to the content tree!
+
 ## Configuration
 
 The `SwipeToolConfig` contains the following options:
 
-| property           | type                                          | default   | description                                                         |
-| ------------------ | --------------------------------------------- | --------- | ------------------------------------------------------------------- |
-| showSwipeTree      | boolean                                       | true      | Whether Swipe Tree is shown on tool activation.                     |
-| showSwipeElement   | boolean                                       | true      | Whether to show or hide Swipe Controller on activation.             |
-| swipeElementTitles | Object<string,string>&vert;undefined          | undefined | An object with keys 'left' and 'right' containing titles.           |
-| swipeLayerStates   | Object<string,LayerSwipeState&vert;undefined> | undefined | An object with layer name as key and state of SplitLayers as value. |
+| property           | type                                          | default   | description                                                                                                |
+| ------------------ | --------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------- |
+| showSwipeTree      | boolean                                       | true      | Whether Swipe Tree is shown on tool activation.                                                            |
+| showSwipeElement   | boolean                                       | true      | Whether to show or hide Swipe Controller on activation.                                                    |
+| splitPosition      | number                                        | 0.5       | Default Position of the Swipe Element. A number between 0 and 1, where 0.5 corresponds to center position. |
+| swipeElementTitles | Object<string,string>&vert;undefined          | undefined | An object with keys 'left' and 'right' containing titles.                                                  |
+| swipeLayerStates   | Object<string,LayerSwipeState&vert;undefined> | undefined | An object with layer name as key and state of SplitLayers as value.                                        |
 
 A `LayerSwipeState` can be defined. This state is applied on first activation of the tool.
 If no values are provided or after deactivation and reactivation the current state of the layers are used.
@@ -46,7 +49,7 @@ The configuration is done with the following options:
 | property       | type    | description                                                                             |
 | -------------- | ------- | --------------------------------------------------------------------------------------- |
 | splitDirection | string  | The split direction of the layer. Either 'left' or 'right', if omitted none is applied. |
-| active         | boolean | The active state of the layer.                                                          |
+| active         | boolean | The active state of the layer. Must be true for split direction 'left' or 'right'.      |
 
 A config entry could for example look like:
 
@@ -58,7 +61,7 @@ A config entry could for example look like:
   "swipeLayerStates": {
     "Openstreetmap OSM Cache": {
       "active": true,
-      "splitDirection": 1
+      "splitDirection": "right"
     }
   },
   "swipeElementTitles": {

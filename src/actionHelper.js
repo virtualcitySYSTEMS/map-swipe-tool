@@ -1,7 +1,7 @@
 import { ToolboxType, WindowSlot } from '@vcmap/ui';
 import { ObliqueMap } from '@vcmap/core';
 import { reactive } from 'vue';
-import SwipeToolComponent from './swipeToolComponent.vue';
+import SwipeToolComponent from './SwipeToolComponent.vue';
 import { name as pluginName } from '../package.json';
 
 /**

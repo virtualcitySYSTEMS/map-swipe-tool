@@ -50,38 +50,32 @@ function createTitleElement(title, direction) {
  */
 class SwipeElement {
   /**
+   * @param {import("@vcmap/ui").VcsUiApp} app
    * @param {Object<string, string>|undefined} titles
-   * @param {import("@vcmap/core").MapCollection|undefined} mapCollection
    */
-  constructor(titles, mapCollection) {
+  constructor(app, titles) {
     /**
-     * @type {Object<string, string>|undefined}
+     * @type {import("@vcmap/ui").VcsUiApp}
      * @private
      */
-    this._titles = titles;
-
-    /** @type {import("@vcmap/core").MapCollection} */
-    this.mapCollection = mapCollection;
-    /**
-     * @type {function():void|null}
-     * @private
-     */
-    this._mapChangedListener = null;
-
+    this._app = app;
     /**
      * @type {HTMLElement}
      * @api
      */
-    this.element = createSwipeElement(mapCollection.splitPosition);
-    /** @type {import("@vcmap-cesium/engine").ScreenSpaceEventHandler} */
+    this.element = createSwipeElement(this._app.maps.splitPosition);
+    /**
+      @type {import("@vcmap-cesium/engine").ScreenSpaceEventHandler}
+     */
     this.swipeEventHandler = new ScreenSpaceEventHandler(
       /** @type {HTMLCanvasElement} */ (this.element),
     );
-    /** @type {boolean} */
+    /**
+     * @type {boolean}
+     */
     this.swipeActive = false;
     /**
      * @type {boolean}
-     * @api
      */
     this.active = false;
     /**
@@ -92,13 +86,23 @@ class SwipeElement {
      * @type {import("@vcmap/core").VcsEvent<number>}
      */
     this.positionChanged = new VcsEvent();
+    /**
+     * @type {Object<string, string>|undefined}
+     * @private
+     */
+    this._titles = titles;
+    /**
+     *
+     * @type {Array<function():void>}
+     * @private
+     */
+    this._listeners = [];
     this._setTitles();
   }
 
   /**
    * The titles on the swipe element
    * @type {Object<string, string>|undefined}
-   * @api
    */
   get titles() {
     return this._titles;
@@ -124,11 +128,13 @@ class SwipeElement {
     }
     if (this._titles) {
       if (this._titles.left) {
-        this.element.appendChild(createTitleElement(this.titles.left, 'left'));
+        this.element.appendChild(
+          createTitleElement(this._app.vueI18n.t(this.titles.left), 'left'),
+        );
       }
       if (this._titles.right) {
         this.element.appendChild(
-          createTitleElement(this.titles.right, 'right'),
+          createTitleElement(this._app.vueI18n.t(this.titles.right), 'right'),
         );
       }
     }
@@ -142,7 +148,7 @@ class SwipeElement {
     if (!this.active) {
       this._addElementToMap();
       this.element.style.left = `calc(${
-        100.0 * this.mapCollection.splitPosition
+        100.0 * this._app.maps.splitPosition
       }% - 2px)`;
       this.swipeEventHandler.setInputAction(() => {
         this.swipeActive = true;
@@ -155,10 +161,12 @@ class SwipeElement {
         ScreenSpaceEventType.MOUSE_MOVE,
       );
       this.active = true;
-      this._mapChangedListener =
-        this.mapCollection.mapActivated.addEventListener(
+      this._listeners = [
+        this._app.localeChanged.addEventListener(this._setTitles.bind(this)),
+        this._app.maps.mapActivated.addEventListener(
           this.handleMapChange.bind(this),
-        );
+        ),
+      ];
     }
     this.stateChanged.raiseEvent(this.active);
   }
@@ -174,9 +182,8 @@ class SwipeElement {
       this.swipeEventHandler.removeInputAction(ScreenSpaceEventType.LEFT_UP);
       this.swipeEventHandler.removeInputAction(ScreenSpaceEventType.MOUSE_MOVE);
       this.active = false;
-      if (this._mapChangedListener) {
-        this._mapChangedListener();
-      }
+      this._listeners.forEach((cb) => cb());
+      this._listeners.splice(0);
     }
     this.stateChanged.raiseEvent(this.active);
   }
@@ -189,7 +196,7 @@ class SwipeElement {
   }
 
   _addElementToMap() {
-    this.mapCollection.activeMap.mapElement.appendChild(this.element);
+    this._app.maps.activeMap.mapElement.appendChild(this.element);
   }
 
   _removeElementFromMap() {
@@ -209,9 +216,9 @@ class SwipeElement {
         (this.element.offsetLeft + relativeOffset) /
         this.element.parentElement.offsetWidth;
       if (splitPosition > 0.01 && splitPosition < 0.99) {
-        this.mapCollection.splitPosition = splitPosition;
+        this._app.maps.splitPosition = splitPosition;
         this.element.style.left = `calc(${
-          100.0 * this.mapCollection.splitPosition
+          100.0 * this._app.maps.splitPosition
         }% - 2px)`;
         this.positionChanged.raiseEvent(splitPosition);
       }
@@ -220,9 +227,8 @@ class SwipeElement {
 
   destroy() {
     this.deactivate();
-    if (this._mapChangedListener) {
-      this._mapChangedListener();
-    }
+    this._listeners.forEach((cb) => cb());
+    this._listeners.splice(0);
   }
 }
 

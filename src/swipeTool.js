@@ -1,3 +1,4 @@
+import deepEqual from 'fast-deep-equal';
 import { parseBoolean, parseNumber } from '@vcsuite/parsers';
 import { check, checkMaybe } from '@vcsuite/check';
 import {
@@ -25,8 +26,8 @@ import LayerGroupSwipeTreeItem from './swipeTree/layerGroupSwipeTreeItem.js';
  */
 export function parseSwipeLayerState(options) {
   check(options.active, Boolean);
-  check(options.splitDirection, String);
-  const key = options.splitDirection.toUpperCase();
+  checkMaybe(options.splitDirection, String);
+  const key = options.splitDirection?.toUpperCase();
 
   return {
     active: options.active,
@@ -64,9 +65,9 @@ class SwipeTool {
     return {
       showSwipeTree: true,
       showSwipeElement: true,
-      swipeLayerStates: undefined,
       splitPosition: 0.5,
       swipeElementTitles: undefined,
+      swipeLayerStates: undefined,
     };
   }
 
@@ -121,14 +122,18 @@ class SwipeTool {
      * @type {SwipeElement}
      * @private
      */
-    this._swipeElement = new SwipeElement(this._swipeElementTitles, app.maps);
+    this._swipeElement = new SwipeElement(app, this._swipeElementTitles);
+    /**
+     * @type {Object<string,SwipeLayerOptions>}
+     */
+    this.swipeLayerStates = options.swipeLayerStates;
     /**
      * @type {Object<string,SwipeLayerState>}
      * @private
      */
     this._cachedState = {};
     if (options.swipeLayerStates) {
-      Object.entries(options.swipeLayerStates).forEach(
+      Object.entries(this.swipeLayerStates).forEach(
         ([layerName, swipeLayerOptions]) => {
           this._cachedState[layerName] =
             parseSwipeLayerState(swipeLayerOptions);
@@ -528,16 +533,19 @@ class SwipeTool {
       config.splitPosition = this._splitPosition;
     }
     if (
-      JSON.stringify(this.swipeElementTitles) !==
-      JSON.stringify(defaultOptions.swipeElementTitles)
+      !deepEqual(this.swipeElementTitles, defaultOptions.swipeElementTitles)
     ) {
       config.swipeElementTitles = this.swipeElementTitles;
+    }
+    if (!deepEqual(this.swipeLayerStates, defaultOptions.swipeLayerStates)) {
+      config.swipeLayerStates = this.swipeLayerStates;
     }
 
     return config;
   }
 
   destroy() {
+    this.deactivate();
     this.clear();
     this.stateChanged.destroy();
     this._listeners.forEach((cb) => cb());

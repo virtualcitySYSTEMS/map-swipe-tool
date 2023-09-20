@@ -9,7 +9,7 @@
     }
   },
   "swipeElementTitles": {
-    "left": "Left title",
-    "right": "Right title"
+    "left": "swipeTool.swipeElementTitles.left",
+    "right": "swipeTool.swipeElementTitles.right"
   }
 }
