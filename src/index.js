@@ -1,5 +1,6 @@
 import { name, version, mapVersion } from '../package.json';
 import SwipeTool from './swipeTool.js';
+import { parseUrlPluginState, writeUrlPluginState } from './stateHelper.js';
 import SwipeToolConfigEditor from './SwipeToolConfigEditor.vue';
 
 /**
@@ -26,9 +27,9 @@ import SwipeToolConfigEditor from './SwipeToolConfigEditor.vue';
 
 /**
  * @typedef {Object} SwipeToolState
- * @property {boolean} active
- * @property {number|undefined} splitPosition
- * @property {Object<string,SwipeLayerState>} swipeLayerStates
+ * @property {boolean?} active
+ * @property {number?} splitPosition
+ * @property {Object<string,SwipeLayerState>?} swipeLayerStates
  */
 
 /**
@@ -73,13 +74,14 @@ export default function splitView(config) {
       if (!swipeTool) {
         swipeTool = new SwipeTool(app, config);
       }
-      if (state?.splitPosition) {
-        swipeTool.splitPosition = state.splitPosition;
+      const pluginState = parseUrlPluginState(state);
+      if (pluginState?.splitPosition) {
+        swipeTool.splitPosition = pluginState.splitPosition;
       }
-      if (state?.swipeLayerStates) {
-        swipeTool.setState(state.swipeLayerStates);
+      if (pluginState?.swipeLayerStates) {
+        swipeTool.setState(pluginState.swipeLayerStates);
       }
-      if (state?.active) {
+      if (pluginState?.active) {
         const activate = swipeTool.activate.bind(swipeTool);
         // mapElement must be available to add swipeElement
         listener = app.maps.mapActivated.addEventListener(() => {
@@ -93,7 +95,7 @@ export default function splitView(config) {
      * @returns {SwipeToolConfig}
      */
     toJSON() {
-      return swipeTool.toJSON();
+      return swipeTool ? swipeTool.toJSON() : {};
     },
     /**
      * @returns {SwipeToolConfig}
@@ -103,14 +105,19 @@ export default function splitView(config) {
     },
     /**
      * should return the plugins state
-     * @returns {SwipeToolState}
+     * @param {boolean} forUrl
+     * @returns {SwipeToolState|import("./stateHelper.js").SwipeToolUrlState}
      */
-    getState() {
-      return {
+    getState(forUrl) {
+      const state = {
         active: swipeTool.active,
         splitPosition: swipeTool.splitPosition,
         swipeLayerStates: swipeTool.getState(),
       };
+      if (forUrl) {
+        return swipeTool.active ? writeUrlPluginState(state) : {};
+      }
+      return state;
     },
     getConfigEditors() {
       return [{ component: SwipeToolConfigEditor }];

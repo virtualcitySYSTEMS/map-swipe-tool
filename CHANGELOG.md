@@ -1,3 +1,9 @@
+# 1.0.10
+
+- Set url state, only if plugin is active
+- Shorten url param
+- add plugin interface spec
+
 # v1.0.9
 
 - deactivate swipeTool beforeDestroy

@@ -117,6 +117,7 @@ export function setupSwipeToolActions(app, swipeTool) {
     }),
     swipeTool.stateChanged.addEventListener((active) => {
       action.active = active;
+      action.background = !app.windowManager.has(swipeWindowId);
       action.title = getToggleTitle(action);
     }),
     app.maps.mapActivated.addEventListener((map) => {
