@@ -1,4 +1,4 @@
-# 1.0.10
+# 1.0.12
 
 - Set url state, only if plugin is active
 - Shorten url param
