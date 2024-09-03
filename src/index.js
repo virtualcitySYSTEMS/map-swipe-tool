@@ -42,6 +42,7 @@ export default function splitView(config) {
    */
   let swipeTool;
   let listener;
+  let app;
 
   return {
     get name() {
@@ -66,11 +67,12 @@ export default function splitView(config) {
       swipeTool?.deactivate();
     },
     /**
-     * @param {import("@vcmap/ui").VcsUiApp} app
+     * @param {import("@vcmap/ui").VcsUiApp} vcsUiApp
      * @param {SwipeToolState=} state
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    initialize: async (app, state) => {
+    initialize: (vcsUiApp, state) => {
+      app = vcsUiApp;
       if (!swipeTool) {
         swipeTool = new SwipeTool(app, config);
       }
@@ -120,7 +122,14 @@ export default function splitView(config) {
       return state;
     },
     getConfigEditors() {
-      return [{ component: SwipeToolConfigEditor }];
+      return [
+        {
+          component: SwipeToolConfigEditor,
+          infoUrlCallback: app?.getHelpUrlCallback(
+            '/components/plugins/swipeToolConfig.html',
+          ),
+        },
+      ];
     },
     i18n: {
       en: {
@@ -133,7 +142,7 @@ export default function splitView(config) {
           },
           hideController: 'Hide split view control',
           showController: 'Show split view control',
-          treeTitle: 'L | R',
+          treeTitle: "L {'|'} R",
           emptyTree: 'Enable Swipe Tool to show available layers to be split.',
           stateActionTitles: {
             inactiveLeft: 'Show layer on the left side',
@@ -175,7 +184,7 @@ export default function splitView(config) {
           },
           hideController: 'Split View Regler ausblenden',
           showController: 'Split View Regler anzeigen',
-          treeTitle: 'L | R',
+          treeTitle: "L {'|'} R",
           emptyTree:
             'Aktivieren Sie das Swipe Tool, um die verfügbaren Ebenen anzuzeigen.',
           stateActionTitles: {

@@ -41,14 +41,17 @@ class GroupSwipeTreeItem extends SwipeTreeItem {
       () => {
         const children = this._children.value;
         this.visible = children.some((c) => c.visible);
+
         const states = children.map((c) => ({
-          left: c.splitState?.left?.value,
-          right: c.splitState?.right?.value,
+          left: c.splitState?.left,
+          right: c.splitState?.right,
         }));
         this.splitState = getGroupStates(states);
       },
       { deep: true },
     );
+
+    this._destroyWatcher = null;
 
     this._setup();
   }
@@ -77,8 +80,12 @@ class GroupSwipeTreeItem extends SwipeTreeItem {
       });
     };
 
-    const actions = createSplitStateRefActions(this._splitState, cb);
+    const { actions, destroy } = createSplitStateRefActions(
+      this._splitState,
+      cb,
+    );
     actions.forEach((a) => this.addAction(a));
+    this._destroyWatcher = destroy;
   }
 
   /**
@@ -107,6 +114,9 @@ class GroupSwipeTreeItem extends SwipeTreeItem {
   destroy() {
     this._clearListeners();
     super.destroy();
+    if (this._destroyWatcher) {
+      this._destroyWatcher();
+    }
   }
 }
 

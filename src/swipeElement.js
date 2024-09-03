@@ -4,6 +4,7 @@ import {
 } from '@vcmap-cesium/engine';
 import { checkMaybe } from '@vcsuite/check';
 import { VcsEvent } from '@vcmap/core';
+import { name as pluginName } from '../package.json';
 
 /**
  * @param {number} splitPosition
@@ -39,7 +40,7 @@ function createTitleElement(title, direction) {
     element.style.left = '3px';
   }
   element.style.zIndex = '9999';
-  element.innerText = title; // XXX title should be translated, as soon as app provides a translate method
+  element.innerText = title;
   return element;
 }
 
@@ -97,7 +98,14 @@ class SwipeElement {
      * @private
      */
     this._listeners = [];
-    this._setTitles();
+
+    this._i18nChangedListener = this._app.i18n.changed.addEventListener(
+      ({ name }) => {
+        if (name === pluginName) {
+          this._setTitles();
+        }
+      },
+    );
   }
 
   /**
@@ -227,6 +235,7 @@ class SwipeElement {
 
   destroy() {
     this.deactivate();
+    this._i18nChangedListener();
     this._listeners.forEach((cb) => cb());
     this._listeners.splice(0);
   }

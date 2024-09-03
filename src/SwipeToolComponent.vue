@@ -12,11 +12,11 @@
                   {{ tree.icon }}
                 </v-icon>
               </div>
-              <div class="col-8">
+              <div>
                 <strong class="px-1">{{ $t(tree.title) }}</strong>
               </div>
-              <div class="col-3 d-flex justify-center">
-                <strong>{{ $t('swipeTool.treeTitle') }}</strong>
+              <div class="ml-auto mr-4">
+                <strong>{{ $st('swipeTool.treeTitle') }}</strong>
               </div>
             </div>
           </article>
@@ -47,20 +47,22 @@
   }
 
   .vcm-swipe-element:before {
-    right: -10px;
+    right: calc(-1 * (var(--v-vcs-item-height) * 0.39375 - 2.6px));
+    // -10px;
     content: '';
-    background-color: var(--v-primary-base);
+    background-color: rgb(var(--v-theme-primary));
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: calc(var(--v-vcs-item-height) - 8px);
+    height: calc(var(--v-vcs-item-height) - 8px);
   }
 
   .vcm-swipe-element:after {
-    left: -9px;
+    left: calc(-1 * (var(--v-vcs-item-height) * 0.625 - 11px));
+    // -9px;
     content: '';
-    width: 24px;
-    height: 24px;
-    background-color: var(--v-base-lighten5);
+    width: calc(var(--v-vcs-item-height) - 8px);
+    height: calc(var(--v-vcs-item-height) - 8px);
+    background-color: rgb(var(--v-theme-base-lighten-5));
     -webkit-mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
     mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
     -webkit-mask-repeat: no-repeat;
@@ -72,7 +74,7 @@
   .vcm-swipe-element {
     vertical-align: middle;
     width: 5px;
-    background-color: var(--v-primary-base);
+    background-color: rgb(var(--v-theme-primary));
     touch-action: none;
   }
 
@@ -81,10 +83,10 @@
   }
 
   .vcm-swipe-element-title {
-    color: var(--v-base-lighten5);
+    color: rgb(var(--v-theme-base-lighten-5));
     white-space: nowrap;
     padding: 5px;
-    background-color: var(--v-primary-base);
+    background-color: rgb(var(--v-theme-primary));
   }
 
   .vcm-swipe-element-title-left {
@@ -97,12 +99,12 @@
     border-top-right-radius: 4px 4px;
   }
   .vcm-tree-header {
-    background-color: var(--v-base-lighten3);
+    background-color: rgb(var(--v-theme-base-lighten-3));
   }
 </style>
 <script>
   import { computed, inject } from 'vue';
-  import { VIcon } from 'vuetify/lib';
+  import { VIcon } from 'vuetify/components';
   import { VcsFormSection, VcsTreeview } from '@vcmap/ui';
   import { name } from '../package.json';
 
@@ -120,7 +122,6 @@
     setup() {
       const app = inject('vcsApp');
       const plugin = app.plugins.getByKey(name);
-
       const { subTreeIds } = plugin.swipeTool;
       const trees = computed(() => {
         return subTreeIds.value.map(

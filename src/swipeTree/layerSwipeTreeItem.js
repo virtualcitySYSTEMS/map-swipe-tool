@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { VcsObjectContentTreeItem } from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import { check } from '@vcsuite/check';
@@ -46,7 +46,7 @@ const stateI18nMap = {
  * Creates an action
  * @param {SplitActionStateObject} splitStateObj
  * @param {function():void} callback
- * @returns {Array<import("@vcmap/ui").VcsAction>}
+ * @returns {{ actions: Array<import("@vcmap/ui").VcsAction>, destroy: () => void }}
  */
 export function createSplitStateRefActions(splitStateObj, callback) {
   check(splitStateObj.left.value, Object.values(SplitActionState));
@@ -55,22 +55,41 @@ export function createSplitStateRefActions(splitStateObj, callback) {
 
   const { left, right } = splitStateObj;
 
-  const splitRightAction = {
+  const splitRightAction = reactive({
     name: 'split-right',
-    active: computed(() => !!right.value),
-    icon: computed(() => stateIconMap[right.value]),
-    title: computed(() => `${stateI18nMap[right.value]}Right`),
+    active: !!right.value,
+    icon: stateIconMap[right.value],
+    title: `${stateI18nMap[right.value]}Right`,
     callback: () => callback(SplitDirection.RIGHT),
-  };
-  const splitLeftAction = {
-    name: 'split-left',
-    active: computed(() => !!left.value),
-    icon: computed(() => stateIconMap[left.value]),
-    title: computed(() => `${stateI18nMap[left.value]}Left`),
-    callback: () => callback(SplitDirection.LEFT),
-  };
+  });
 
-  return [splitRightAction, splitLeftAction];
+  const destroyWatcherRight = watch(right, (newValue) => {
+    splitRightAction.active = !!newValue;
+    splitRightAction.icon = stateIconMap[newValue];
+    splitRightAction.title = `${stateI18nMap[right.value]}Right`;
+  });
+
+  const splitLeftAction = reactive({
+    name: 'split-left',
+    active: !!left.value,
+    icon: stateIconMap[left.value],
+    title: `${stateI18nMap[left.value]}Left`,
+    callback: () => callback(SplitDirection.LEFT),
+  });
+
+  const destroyWatcherLeft = watch(left, (newValue) => {
+    splitLeftAction.active = !!newValue;
+    splitLeftAction.icon = stateIconMap[newValue];
+    splitLeftAction.title = `${stateI18nMap[left.value]}Left`;
+  });
+
+  return {
+    actions: [splitRightAction, splitLeftAction],
+    destroy: () => {
+      destroyWatcherRight();
+      destroyWatcherLeft();
+    },
+  };
 }
 
 /**
@@ -184,6 +203,12 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem {
      */
     this._listeners = [];
 
+    /**
+     * @type {function(): void}
+     * @private
+     */
+    this._destroyWatcher = null;
+
     this._setup();
   }
 
@@ -226,8 +251,12 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem {
     this.removeAction('split-left');
 
     const cb = toggle.bind(this, this._app.maps.layerCollection, this.layer);
-    const actions = createSplitStateRefActions(this._splitState, cb);
+    const { actions, destroy } = createSplitStateRefActions(
+      this._splitState,
+      cb,
+    );
     actions.forEach((a) => this.addAction(a));
+    this._destroyWatcher = destroy;
   }
 
   /**
@@ -314,6 +343,11 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem {
 
   destroy() {
     super.destroy();
+
+    if (this._destroyWatcher) {
+      this._destroyWatcher();
+    }
+
     this._clearListeners();
   }
 }

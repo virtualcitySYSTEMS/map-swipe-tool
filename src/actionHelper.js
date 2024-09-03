@@ -35,10 +35,10 @@ function createSwipeElementAction(swipeElement) {
     callback() {
       if (swipeElement.active) {
         swipeElement.deactivate();
-        this.title = 'swipeTool.showController';
+        action.title = 'swipeTool.showController';
       } else {
         swipeElement.activate();
-        this.title = 'swipeTool.hideController';
+        action.title = 'swipeTool.hideController';
       }
     },
   });
@@ -82,21 +82,21 @@ export function setupSwipeToolActions(app, swipeTool) {
     background: false,
     disabled: false,
     callback() {
-      if (this.active) {
-        if (this.background) {
+      if (action.active) {
+        if (action.background) {
           return app.windowManager.add(windowComponent, pluginName);
         } else {
           app.windowManager.remove(swipeWindowId);
           swipeTool.deactivate();
-          this.active = false;
+          action.active = false;
         }
-        this.background = false;
+        action.background = false;
       } else {
         swipeTool.activate();
-        this.active = true;
+        action.active = true;
         return app.windowManager.add(windowComponent, pluginName);
       }
-      this.title = getToggleTitle(this);
+      action.title = getToggleTitle(action);
       return null;
     },
   });
@@ -169,14 +169,14 @@ export function setupSwipeToolActionsNoUI(app, swipeTool) {
     icon: '$vcsSplitView',
     active: false,
     callback() {
-      if (this.active) {
+      if (action.active) {
         swipeTool.deactivate();
-        this.active = false;
-        this.title = 'swipeTool.toolStateTitles.activate';
+        action.active = false;
+        action.title = 'swipeTool.toolStateTitles.activate';
       } else {
         swipeTool.activate();
-        this.active = true;
-        this.title = 'swipeTool.toolStateTitles.deactivate';
+        action.active = true;
+        action.title = 'swipeTool.toolStateTitles.deactivate';
       }
       return null;
     },

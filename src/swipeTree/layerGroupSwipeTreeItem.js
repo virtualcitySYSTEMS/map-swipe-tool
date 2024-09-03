@@ -73,6 +73,12 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
      */
     this._listeners = [];
 
+    /**
+     * @type {function(): void}
+     * @private
+     */
+    this._destroyWatcher = null;
+
     this._setup();
   }
 
@@ -115,8 +121,13 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
         })
         .forEach((layer) => toggle(this._app.maps.layerCollection, layer, dir));
     };
-    const actions = createSplitStateRefActions(this._splitState, cb);
+    const { actions, destroy } = createSplitStateRefActions(
+      this._splitState,
+      cb,
+    );
     actions.forEach((a) => this.addAction(a));
+
+    this._destroyWatcher = destroy;
   }
 
   /**
@@ -191,6 +202,11 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
    */
   destroy() {
     this._clearListeners();
+
+    if (this._destroyWatcher) {
+      this._destroyWatcher();
+    }
+
     super.destroy();
   }
 }

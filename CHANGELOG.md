@@ -1,3 +1,7 @@
+# 2.0.0-rc.0
+
+- update the plugin to Map 6.0
+
 # 1.0.12
 
 - Set url state, only if plugin is active

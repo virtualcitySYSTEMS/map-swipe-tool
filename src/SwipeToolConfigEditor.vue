@@ -9,7 +9,7 @@
       <v-container class="py-0 px-1">
         <v-row no-gutters>
           <v-col>
-            <VcsLabel html-for="showSwipeTree" dense>
+            <VcsLabel html-for="showSwipeTree">
               {{ $t('swipeTool.editor.showSwipeTree') }}
             </VcsLabel>
           </v-col>
@@ -24,7 +24,7 @@
         </v-row>
         <v-row no-gutters>
           <v-col>
-            <VcsLabel html-for="showSwipeElement" dense>
+            <VcsLabel html-for="showSwipeElement">
               {{ $t('swipeTool.editor.showSwipeElement') }}
             </VcsLabel>
           </v-col>
@@ -39,14 +39,13 @@
         </v-row>
         <v-row no-gutters>
           <v-col>
-            <VcsLabel html-for="splitPosition" dense>
+            <VcsLabel html-for="splitPosition">
               {{ $t('swipeTool.editor.splitPosition') }}
             </VcsLabel>
           </v-col>
           <v-col>
             <VcsTextField
               id="showSwipeElement"
-              dense
               type="number"
               step="0.1"
               min="0.0"
@@ -57,8 +56,8 @@
         </v-row>
         <v-row no-gutters>
           <v-col>
-            <VcsLabel html-for="swipeElementTitles" dense>
-              {{ $t('swipeTool.editor.swipeElementTitles') }}
+            <VcsLabel html-for="swipeElementTitles">
+              {{ $st('swipeTool.editor.swipeElementTitles') }}
             </VcsLabel>
           </v-col>
           <v-col>
@@ -76,7 +75,6 @@
         <v-row v-if="localConfig.swipeElementTitles" no-gutters>
           <v-col>
             <VcsTextField
-              dense
               clearable
               :prefix="$t('swipeTool.swipeElementTitles.left')"
               v-model.trim="swipeElementTitles.left"
@@ -84,7 +82,6 @@
           </v-col>
           <v-col>
             <VcsTextField
-              dense
               clearable
               :prefix="$t('swipeTool.swipeElementTitles.right')"
               v-model.trim="swipeElementTitles.right"
@@ -103,7 +100,6 @@
           <v-col>
             <VcsSelect
               id="name"
-              dense
               :placeholder="$t('swipeTool.editor.swipeLayer.name')"
               :items="splitLayers"
               :item-text="(item) => item.title"
@@ -124,7 +120,7 @@
 </template>
 
 <script>
-  import { VContainer, VRow, VCol } from 'vuetify/lib';
+  import { VContainer, VRow, VCol } from 'vuetify/components';
   import {
     AbstractConfigEditor,
     VcsFormSection,
