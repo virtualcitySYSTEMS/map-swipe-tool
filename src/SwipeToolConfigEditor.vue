@@ -249,19 +249,18 @@
 
       const localConfig = ref({});
       const defaultOptions = SwipeTool.getDefaultOptions();
-      props.getConfig().then((config) => {
-        localConfig.value = Object.assign(defaultOptions, config);
-        swipeElementTitles.value = localConfig.value.swipeElementTitles || {};
-        swipeLayerNames.value = getSwipeLayerNames(config.swipeLayerStates);
-        swipeLayerItems.value = swipeLayerNames.value.map((name) =>
-          createItem(
-            name,
-            getTitle(app, name),
-            localConfig.value.swipeLayerStates,
-            swipeLayerItems,
-          ),
-        );
-      });
+      const config = props.getConfig();
+      localConfig.value = Object.assign(defaultOptions, config);
+      swipeElementTitles.value = localConfig.value.swipeElementTitles || {};
+      swipeLayerNames.value = getSwipeLayerNames(config.swipeLayerStates);
+      swipeLayerItems.value = swipeLayerNames.value.map((name) =>
+        createItem(
+          name,
+          getTitle(app, name),
+          localConfig.value.swipeLayerStates,
+          swipeLayerItems,
+        ),
+      );
 
       const addSwipeLayer = () => {
         if (!localConfig.value.swipeLayerStates) {
@@ -284,14 +283,14 @@
         swipeLayerName.value = '';
       };
 
-      const apply = async () => {
+      const apply = () => {
         if (localConfig.value.swipeElementTitles) {
           localConfig.value.swipeElementTitles = swipeElementTitles.value;
         }
         if (swipeLayerNames.value.length < 1) {
           localConfig.value.swipeLayerStates = undefined;
         }
-        await props.setConfig(localConfig.value);
+        props.setConfig(localConfig.value);
       };
 
       return {
