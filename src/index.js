@@ -136,7 +136,7 @@ export default function splitView(config) {
         swipeTool: {
           title: 'Swipe Tool',
           toolStateTitles: {
-            activate: 'Enable Swipe Tool',
+            activate: 'Swipe layers',
             deactivate: 'Disable Swipe Tool',
             open: 'Open Swipe Tool window',
           },
@@ -178,7 +178,7 @@ export default function splitView(config) {
         swipeTool: {
           title: 'Swipe Tool',
           toolStateTitles: {
-            activate: 'Swipe Tool aktivieren',
+            activate: 'Ebenen vergleichen',
             deactivate: 'Swipe Tool deaktivieren',
             open: 'Swipe Tool Fenster öffnen',
           },

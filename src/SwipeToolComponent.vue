@@ -15,7 +15,7 @@
               <div>
                 <strong class="px-1">{{ $t(tree.title) }}</strong>
               </div>
-              <div class="ml-auto mr-4">
+              <div class="ml-auto mr-10">
                 <strong>{{ $st('swipeTool.treeTitle') }}</strong>
               </div>
             </div>
@@ -47,21 +47,21 @@
   }
 
   .vcm-swipe-element:before {
-    right: calc(-1 * (var(--v-vcs-item-height) * 0.39375 - 2.6px));
+    right: calc(-1 * (var(--v-vcs-font-size) * 0.7875));
     // -10px;
     content: '';
     background-color: rgb(var(--v-theme-primary));
     border-radius: 50%;
-    width: calc(var(--v-vcs-item-height) - 8px);
-    height: calc(var(--v-vcs-item-height) - 8px);
+    width: calc((var(--v-vcs-font-size) * 2) - 2px);
+    height: calc((var(--v-vcs-font-size) * 2) - 2px);
   }
 
   .vcm-swipe-element:after {
-    left: calc(-1 * (var(--v-vcs-item-height) * 0.625 - 11px));
+    left: calc(-1 * ((var(--v-vcs-font-size) * 2) * 0.625 - 7px));
     // -9px;
     content: '';
-    width: calc(var(--v-vcs-item-height) - 8px);
-    height: calc(var(--v-vcs-item-height) - 8px);
+    width: calc(var(--v-vcs-font-size) * 2 - 2px);
+    height: calc(var(--v-vcs-font-size) * 2 - 2px);
     background-color: rgb(var(--v-theme-base-lighten-5));
     -webkit-mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
     mask-image: url('data:image/svg+xml;utf8,<svg height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.53,6.72c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l3.86,3.86c.06.06.06.15,0,.21l-3.86,3.86c-.29.29-.29.77,0,1.06.29.29.77.29,1.06,0l4.5-4.5c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-4.5-4.5c-.29-.29-.77-.29-1.06,0,0,0,0,0,0,0h0Zm-5,10.33c.29-.29.29-.77,0-1.06,0,0,0,0,0,0l-3.86-3.86c-.06-.06-.06-.15,0-.21l3.86-3.86c.29-.29.29-.77,0-1.06-.29-.29-.77-.29-1.06,0l-4.5,4.5c-.29.29-.29.77,0,1.06,0,0,0,0,0,0l4.5,4.5c.29.29.77.29,1.06,0,0,0,0,0,0,0h0Z" fill="currentColor" /></svg>');
