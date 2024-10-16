@@ -134,14 +134,14 @@ export default function splitView(config) {
     i18n: {
       en: {
         swipeTool: {
-          title: 'Swipe Tool',
+          title: 'Swipe layers',
           toolStateTitles: {
             activate: 'Swipe layers',
             deactivate: 'Disable Swipe Tool',
             open: 'Open Swipe Tool window',
           },
-          hideController: 'Hide split view control',
-          showController: 'Show split view control',
+          hideController: 'Hide control',
+          showController: 'Show control',
           treeTitle: "L {'|'} R",
           emptyTree: 'Enable Swipe Tool to show available layers to be split.',
           stateActionTitles: {
@@ -176,14 +176,14 @@ export default function splitView(config) {
       },
       de: {
         swipeTool: {
-          title: 'Swipe Tool',
+          title: 'Ebenen vergleichen',
           toolStateTitles: {
             activate: 'Ebenen vergleichen',
             deactivate: 'Swipe Tool deaktivieren',
             open: 'Swipe Tool Fenster öffnen',
           },
-          hideController: 'Split View Regler ausblenden',
-          showController: 'Split View Regler anzeigen',
+          hideController: 'Regler ausblenden',
+          showController: 'Regler anzeigen',
           treeTitle: "L {'|'} R",
           emptyTree:
             'Aktivieren Sie das Swipe Tool, um die verfügbaren Ebenen anzuzeigen.',
