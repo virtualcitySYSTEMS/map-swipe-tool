@@ -45,7 +45,7 @@
           </v-col>
           <v-col>
             <VcsTextField
-              id="showSwipeElement"
+              id="splitPosition"
               type="number"
               step="0.1"
               min="0.0"
@@ -206,7 +206,6 @@
 
   export default {
     name: 'SwipeToolConfigEditor',
-    title: 'Swipe Tool Editor',
     components: {
       VContainer,
       VRow,

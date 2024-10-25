@@ -155,6 +155,7 @@ class SwipeElement {
   activate() {
     if (!this.active) {
       this._addElementToMap();
+      this._setTitles();
       this.element.style.left = `calc(${
         100.0 * this._app.maps.splitPosition
       }% - 2px)`;

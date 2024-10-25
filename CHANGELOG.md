@@ -1,6 +1,7 @@
-# 2.0.0-rc.0
+# v2.0.0
 
-- update the plugin to Map 6.0
+- Updates @vcmap/core and @vcmap/ui to 6.x
+- Fixes a bug where Swipe Element Titles would not be displayed
 
 # 1.0.12
 

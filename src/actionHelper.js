@@ -7,21 +7,6 @@ import { name as pluginName } from '../package.json';
 export const swipeWindowId = 'swipe-tool-window';
 
 /**
- * @param {import("@vcmap/ui").VcsAction} action
- * @returns {string}
- */
-function getToggleTitle(action) {
-  if (action?.active) {
-    if (action?.background) {
-      return 'swipeTool.toolStateTitles.open';
-    }
-    return 'swipeTool.toolStateTitles.deactivate';
-  } else {
-    return 'swipeTool.toolStateTitles.activate';
-  }
-}
-
-/**
  *
  * @param {SwipeElement} swipeElement
  * @returns {{action: import("@vcmap/ui").VcsAction, destroy: Function}}
@@ -76,7 +61,7 @@ export function setupSwipeToolActions(app, swipeTool) {
 
   const action = reactive({
     name: 'swipe-action',
-    title: getToggleTitle(this),
+    title: 'swipeTool.title',
     icon: '$vcsSplitView',
     active: false,
     background: false,
@@ -96,7 +81,6 @@ export function setupSwipeToolActions(app, swipeTool) {
         action.active = true;
         return app.windowManager.add(windowComponent, pluginName);
       }
-      action.title = getToggleTitle(action);
       return null;
     },
   });
@@ -106,19 +90,16 @@ export function setupSwipeToolActions(app, swipeTool) {
       if (id === swipeWindowId) {
         action.active = true;
         action.background = false;
-        action.title = getToggleTitle(action);
       }
     }),
     app.windowManager.removed.addEventListener(({ id }) => {
       if (id === swipeWindowId) {
         action.background = true;
-        action.title = getToggleTitle(action);
       }
     }),
     swipeTool.stateChanged.addEventListener((active) => {
       action.active = active;
       action.background = !app.windowManager.has(swipeWindowId);
-      action.title = getToggleTitle(action);
     }),
     app.maps.mapActivated.addEventListener((map) => {
       if (map instanceof ObliqueMap) {
@@ -172,11 +153,9 @@ export function setupSwipeToolActionsNoUI(app, swipeTool) {
       if (action.active) {
         swipeTool.deactivate();
         action.active = false;
-        action.title = 'swipeTool.toolStateTitles.activate';
       } else {
         swipeTool.activate();
         action.active = true;
-        action.title = 'swipeTool.toolStateTitles.deactivate';
       }
       return null;
     },
@@ -184,7 +163,6 @@ export function setupSwipeToolActionsNoUI(app, swipeTool) {
 
   const listener = swipeTool.stateChanged.addEventListener((active) => {
     action.active = active;
-    action.title = getToggleTitle(action);
   });
 
   if (app.toolboxManager.has(pluginName)) {

@@ -125,8 +125,10 @@ export default function splitView(config) {
       return [
         {
           component: SwipeToolConfigEditor,
+          title: 'swipeTool.editor.title',
           infoUrlCallback: app?.getHelpUrlCallback(
             '/components/plugins/swipeToolConfig.html',
+            'app-configurator',
           ),
         },
       ];
@@ -134,12 +136,7 @@ export default function splitView(config) {
     i18n: {
       en: {
         swipeTool: {
-          title: 'Swipe layers',
-          toolStateTitles: {
-            activate: 'Swipe layers',
-            deactivate: 'Disable Swipe Tool',
-            open: 'Open Swipe Tool window',
-          },
+          title: 'Swipe content',
           hideController: 'Hide control',
           showController: 'Show control',
           treeTitle: "L {'|'} R",
@@ -157,12 +154,12 @@ export default function splitView(config) {
             right: 'Right',
           },
           editor: {
+            title: 'Swipe Tool Editor',
             general: 'General settings',
             showSwipeTree: 'Enable swipe tool ui',
             showSwipeElement: 'Show swipe element',
             splitPosition: 'Initial split position',
             swipeElementTitles: 'Swipe element titles',
-            swipeLayerStates: 'Swipe layer states',
             swipeLayer: {
               title: 'Define initial state for layers',
               name: 'Select layer',
@@ -176,17 +173,12 @@ export default function splitView(config) {
       },
       de: {
         swipeTool: {
-          title: 'Ebenen vergleichen',
-          toolStateTitles: {
-            activate: 'Ebenen vergleichen',
-            deactivate: 'Swipe Tool deaktivieren',
-            open: 'Swipe Tool Fenster öffnen',
-          },
+          title: 'Inhalte vergleichen',
           hideController: 'Regler ausblenden',
           showController: 'Regler anzeigen',
           treeTitle: "L {'|'} R",
           emptyTree:
-            'Aktivieren Sie das Swipe Tool, um die verfügbaren Ebenen anzuzeigen.',
+            'Aktivieren Sie das Splittenwerkzeug, um die verfügbaren Ebenen anzuzeigen.',
           stateActionTitles: {
             inactiveLeft: 'Ebene links anzeigen',
             inactiveRight: 'Ebene rechts anzeigen',
@@ -200,12 +192,12 @@ export default function splitView(config) {
             right: 'Rechts',
           },
           editor: {
+            title: 'Splittenwerkzeug Editor',
             general: 'Allgemeine Einstellungen',
             showSwipeTree: 'Zeige Benutzeroberfläche',
             showSwipeElement: 'Zeige Swipe Element',
             splitPosition: 'Anfangssplitposition',
             swipeElementTitles: 'Swipe Element Titel',
-            swipeLayerStates: 'Zustände der Ebenen',
             swipeLayer: {
               title: 'Definition von Anfangszuständen für Ebenen',
               name: 'Ebene auswählen',
