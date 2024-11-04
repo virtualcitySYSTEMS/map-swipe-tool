@@ -1,3 +1,8 @@
+# v2.0.1
+
+- Fixes a bug where editing the Swipe Element Titles would uncheck the relative checkbox
+- Fixes a bug where the Initial Split Position could be set to an invalid value
+
 # v2.0.0
 
 - Updates @vcmap/core and @vcmap/ui to 6.x

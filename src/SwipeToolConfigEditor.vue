@@ -51,6 +51,10 @@
               min="0.0"
               max="1.0"
               v-model.number="localConfig.splitPosition"
+              :rules="[
+                (v) =>
+                  (v >= 0 && v <= 1) || 'swipeTool.editor.splitPositionInvalid',
+              ]"
             />
           </v-col>
         </v-row>
@@ -63,16 +67,11 @@
           <v-col>
             <VcsCheckbox
               id="swipeElementTitles"
-              v-model="localConfig.swipeElementTitles"
-              :true-value="{
-                right: swipeElementTitles.right,
-                left: swipeElementTitles.left,
-              }"
-              :false-value="undefined"
+              v-model="enableSwipeElementTitle"
             />
           </v-col>
         </v-row>
-        <v-row v-if="localConfig.swipeElementTitles" no-gutters>
+        <v-row v-if="enableSwipeElementTitle" no-gutters>
           <v-col>
             <VcsTextField
               clearable
@@ -251,6 +250,10 @@
       const config = props.getConfig();
       localConfig.value = Object.assign(defaultOptions, config);
       swipeElementTitles.value = localConfig.value.swipeElementTitles || {};
+      const enableSwipeElementTitle = ref(
+        !!Object.keys(swipeElementTitles.value).length,
+      );
+
       swipeLayerNames.value = getSwipeLayerNames(config.swipeLayerStates);
       swipeLayerItems.value = swipeLayerNames.value.map((name) =>
         createItem(
@@ -283,8 +286,10 @@
       };
 
       const apply = () => {
-        if (localConfig.value.swipeElementTitles) {
+        if (enableSwipeElementTitle.value) {
           localConfig.value.swipeElementTitles = swipeElementTitles.value;
+        } else {
+          delete localConfig.value.swipeElementTitles;
         }
         if (swipeLayerNames.value.length < 1) {
           localConfig.value.swipeLayerStates = undefined;
@@ -294,6 +299,7 @@
 
       return {
         localConfig,
+        enableSwipeElementTitle,
         swipeElementTitles,
         splitLayers,
         swipeLayerName,

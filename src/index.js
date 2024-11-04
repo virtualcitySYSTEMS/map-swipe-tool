@@ -159,6 +159,8 @@ export default function splitView(config) {
             showSwipeTree: 'Enable swipe tool ui',
             showSwipeElement: 'Show swipe element',
             splitPosition: 'Initial split position',
+            splitPositionInvalid:
+              'Invalid entry: value must be between 0 and 1',
             swipeElementTitles: 'Swipe element titles',
             swipeLayer: {
               title: 'Define initial state for layers',
@@ -197,6 +199,8 @@ export default function splitView(config) {
             showSwipeTree: 'Zeige Benutzeroberfläche',
             showSwipeElement: 'Zeige Swipe Element',
             splitPosition: 'Anfangssplitposition',
+            splitPositionInvalid:
+              'Ungültige Eingabe: Der Wert muss zwischen 0 und 1 liegen',
             swipeElementTitles: 'Swipe Element Titel',
             swipeLayer: {
               title: 'Definition von Anfangszuständen für Ebenen',
