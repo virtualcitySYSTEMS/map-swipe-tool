@@ -24,7 +24,9 @@
         <template #default>
           <VcsTreeview
             :items="tree.visibleChildren"
+            v-model:opened="opened"
             item-children="visibleChildren"
+            open-on-click
           />
         </template>
       </VcsFormSection>
@@ -103,9 +105,9 @@
   }
 </style>
 <script>
-  import { computed, inject } from 'vue';
+  import { computed, inject, ref } from 'vue';
   import { VIcon } from 'vuetify/components';
-  import { VcsFormSection, VcsTreeview } from '@vcmap/ui';
+  import { openStateMapSymbol, VcsFormSection, VcsTreeview } from '@vcmap/ui';
   import { name } from '../package.json';
 
   /**
@@ -123,6 +125,15 @@
       const app = inject('vcsApp');
       const plugin = app.plugins.getByKey(name);
       const { subTreeIds } = plugin.swipeTool;
+      const opened = ref();
+      if (app.contentTree[openStateMapSymbol]?.size) {
+        opened.value = [...app.contentTree[openStateMapSymbol].values()][0];
+      } else {
+        opened.value = subTreeIds.value.flatMap((id) =>
+          app.contentTree.getTreeOpenState(id),
+        );
+      }
+
       const trees = computed(() => {
         return subTreeIds.value.map(
           (id) => plugin.swipeTool.getComputedVisibleTree(id).value,
@@ -132,6 +143,7 @@
       return {
         subTreeIds,
         trees,
+        opened,
       };
     },
   };

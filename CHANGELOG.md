@@ -1,3 +1,7 @@
+# v2.0.2
+
+- Makes the open state of the groups match the ContentTree on startup
+
 # v2.0.1
 
 - Fixes a bug where editing the Swipe Element Titles would uncheck the relative checkbox
