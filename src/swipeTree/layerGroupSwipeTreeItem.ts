@@ -1,18 +1,22 @@
 import { SplitDirection } from '@vcmap-cesium/engine';
+import type { Layer } from '@vcmap/core';
+import type { LayerGroupContentTreeItemOptions, VcsUiApp } from '@vcmap/ui';
+import { getLogger } from '@vcsuite/logger';
 import {
   createSplitStateRefActions,
   getSplitStateFromLayer,
   SplitActionState,
   toggle,
+  type SplitActionStateObject,
 } from './layerSwipeTreeItem.js';
 import SwipeTreeItem from './swipeTreeItem.js';
+import type { SplitableLayer } from '../swipeTool.js';
+import { name } from '../../package.json';
 
-/**
- * @param {Array<SplitActionStateObject>} states
- * @param {string} side
- * @returns {SplitActionState}
- */
-export function getGroupStateForSide(states, side) {
+function getGroupStateForSide(
+  states: SplitActionStateObject[],
+  side: 'left' | 'right',
+): SplitActionState {
   if (states.every((s) => s[side] === SplitActionState.ACTIVE)) {
     return SplitActionState.ACTIVE;
   }
@@ -22,22 +26,18 @@ export function getGroupStateForSide(states, side) {
   return SplitActionState.INDETERMINATE;
 }
 
-/**
- * @param {Array<SplitActionStateObject>} states
- * @returns {SplitActionStateObject}
- */
-export function getGroupStates(states) {
+export function getGroupStates(
+  states: SplitActionStateObject[],
+): SplitActionStateObject {
   return {
     left: getGroupStateForSide(states, 'left'),
     right: getGroupStateForSide(states, 'right'),
   };
 }
 
-/**
- * @param {Array<import("@vcmap/core").Layer>} layers
- * @returns {SplitActionStateObject}
- */
-export function getSplitStateFromLayers(layers) {
+export function getSplitStateFromLayers(
+  layers: SplitableLayer[],
+): SplitActionStateObject {
   return getGroupStates(layers.map((l) => getSplitStateFromLayer(l)));
 }
 
@@ -47,82 +47,67 @@ export function getSplitStateFromLayers(layers) {
  * @extends {import("@vcmap/ui").ContentTreeItem}
  */
 class LayerGroupSwipeTreeItem extends SwipeTreeItem {
-  /**
-   * @returns {string}
-   */
-  static get className() {
+  static get className(): string {
     return 'LayerGroupSwipeTreeItem';
   }
 
-  /**
-   * @param {import("@vcmap/ui").LayerGroupContentTreeItemOptions} options
-   * @param {import("@vcmap/ui").VcsUiApp} app
-   */
-  constructor(options, app) {
+  private _layerNames: string[];
+
+  private _listeners: Array<() => void> = [];
+
+  private _destroyWatcher: (() => void) | undefined;
+
+  constructor(options: LayerGroupContentTreeItemOptions, app: VcsUiApp) {
     super(options, app);
-    /**
-     * @type {Array<string>}
-     * @private
-     */
+
     this._layerNames = Array.isArray(options.layerNames)
       ? options.layerNames.slice()
       : [];
-    /**
-     * @type {Array<Function>}
-     * @private
-     */
-    this._listeners = [];
-
-    /**
-     * @type {function(): void}
-     * @private
-     */
-    this._destroyWatcher = null;
 
     this._setup();
   }
 
-  /**
-   * @type {Array<import("@vcmap/core").SplitLayer>}
-   * @private
-   */
-  get _layers() {
+  private get _layers(): Array<SplitableLayer> {
     return this._layerNames
       .map((n) => this._app.layers.getByKey(n))
-      .filter((l) => l)
-      .filter((l) => l.splitDirection !== undefined);
+      .filter((l) => !!l)
+      .filter((l) => 'splitDirection' in l && l.splitDirection !== undefined)
+      .map((l) => l as SplitableLayer);
   }
 
-  /**
-   * @private
-   */
-  _setSwipeActions() {
+  private _setSwipeActions(): void {
     this.removeAction('split-right');
     this.removeAction('split-left');
 
-    const cb = (dir) => {
+    const cb = (dir: SplitDirection): void => {
       this._layers
         .filter((layer) => {
           const splitState = getSplitStateFromLayer(layer);
           if (dir === SplitDirection.LEFT) {
-            const active =
-              this.splitState.left.value === SplitActionState.ACTIVE;
+            const active = this.splitState.left === SplitActionState.ACTIVE;
             return active
               ? splitState.left === SplitActionState.ACTIVE
               : splitState.left !== SplitActionState.ACTIVE;
           } else if (dir === SplitDirection.RIGHT) {
-            const active =
-              this.splitState.right.value === SplitActionState.ACTIVE;
+            const active = this.splitState.right === SplitActionState.ACTIVE;
             return active
               ? splitState.right === SplitActionState.ACTIVE
               : splitState.right !== SplitActionState.ACTIVE;
           }
           return false;
         })
-        .forEach((layer) => toggle(this._app.maps.layerCollection, layer, dir));
+        .forEach((layer) => {
+          toggle(this._app.maps.layerCollection, layer, dir).catch((e) => {
+            getLogger(name).error(
+              'Error while applying Split Direction to layer',
+              layer.name,
+              e,
+            );
+          });
+        });
     };
     const { actions, destroy } = createSplitStateRefActions(
-      this._splitState,
+      this.splitState,
       cb,
     );
     actions.forEach((a) => this.addAction(a));
@@ -130,23 +115,17 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
     this._destroyWatcher = destroy;
   }
 
-  /**
-   * @private
-   */
-  _setup() {
+  private _setup(): void {
     this._clearListeners();
-    /**
-     * Called when a layer is added or removed to reset the item if needed
-     * @param {import("@vcmap/core").Layer} layer
-     */
-    const resetHandler = (layer) => {
+    /** Called when a layer is added or removed to reset the item if needed */
+    const resetHandler = (layer: Layer): void => {
       if (this._layerNames.includes(layer.name)) {
         this._setup();
       }
     };
     const layers = this._layers;
 
-    this.visible = layers.some((l) => l.isSupported(this._app.maps.activeMap));
+    this.visible = layers.some((l) => l.isSupported(this._app.maps.activeMap!));
     this._setSwipeActions();
 
     this._listeners.push(
@@ -157,7 +136,7 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
     this._listeners.push(
       this._app.maps.mapActivated.addEventListener(() => {
         this.visible = !!layers.find((l) =>
-          l.isSupported(this._app.maps.activeMap),
+          l.isSupported(this._app.maps.activeMap!),
         );
       }),
     );
@@ -178,35 +157,25 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
     this.splitState = getSplitStateFromLayers(layers);
   }
 
-  /**
-   * @private
-   */
-  _clearListeners() {
+  private _clearListeners(): void {
     this._listeners.forEach((cb) => {
       cb();
     });
     this._listeners.splice(0);
   }
 
-  /**
-   * @returns {import("@vcmap/ui").LayerGroupContentTreeItemOptions}
-   */
-  toJSON() {
-    const config = super.toJSON();
-    config.layerNames = this._layerNames.slice();
+  toJSON(): LayerGroupContentTreeItemOptions {
+    const contentTreeConfig = super.toJSON();
+    const config = {
+      ...contentTreeConfig,
+      layerNames: this._layerNames.slice(),
+    };
     return config;
   }
 
-  /**
-   * @inheritDoc
-   */
-  destroy() {
+  destroy(): void {
     this._clearListeners();
-
-    if (this._destroyWatcher) {
-      this._destroyWatcher();
-    }
-
+    this._destroyWatcher?.();
     super.destroy();
   }
 }

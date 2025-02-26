@@ -8,10 +8,12 @@ import {
   afterEach,
 } from 'vitest';
 import { ObliqueMap, OpenlayersMap, VectorLayer } from '@vcmap/core';
-import { VcsUiApp } from '@vcmap/ui';
+import { LayerGroupContentTreeItemOptions, VcsUiApp } from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import LayerGroupSwipeTreeItem from '../../../src/swipeTree/layerGroupSwipeTreeItem.js';
 import { SplitActionState } from '../../../src/swipeTree/layerSwipeTreeItem.js';
+import SwipeTreeItem from '../../../src/swipeTree/swipeTreeItem.js';
+import { SplitableLayer } from '../../../src/swipeTool.js';
 
 describe('LayerGroupContentTreeItem', () => {
   describe('if no layers are present', () => {
@@ -28,9 +30,9 @@ describe('LayerGroupContentTreeItem', () => {
   });
 
   describe('if layers are present', () => {
-    let app;
-    let item;
-    let layers;
+    let app: VcsUiApp;
+    let item: SwipeTreeItem;
+    let layers: SplitableLayer[];
 
     beforeEach(async () => {
       app = new VcsUiApp();
@@ -85,8 +87,8 @@ describe('LayerGroupContentTreeItem', () => {
             return l.activate();
           }),
         );
-        expect(item.splitState.left.value).to.equal(SplitActionState.ACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.ACTIVE);
       });
 
       it('should have a split state of left ACTIVE and right INACTIVE, if all layers are active and have SplitDirection left', async () => {
@@ -96,8 +98,8 @@ describe('LayerGroupContentTreeItem', () => {
             return l.activate();
           }),
         );
-        expect(item.splitState.left.value).to.equal(SplitActionState.ACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.INACTIVE);
       });
 
       it('should have a split state of left INACTIVE and right ACTIVE, if all layers are active and have SplitDirection right', async () => {
@@ -107,8 +109,8 @@ describe('LayerGroupContentTreeItem', () => {
             return l.activate();
           }),
         );
-        expect(item.splitState.left.value).to.equal(SplitActionState.INACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.ACTIVE);
       });
 
       it('should have a split state of left/ right INACTIVE, if all layers are inactive', async () => {
@@ -118,16 +120,16 @@ describe('LayerGroupContentTreeItem', () => {
             return l.deactivate();
           }),
         );
-        expect(item.splitState.left.value).to.equal(SplitActionState.INACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.INACTIVE);
       });
     });
   });
 
   describe('serialization', () => {
-    let app;
-    let inputConfig;
-    let outputConfig;
+    let app: VcsUiApp;
+    let inputConfig: LayerGroupContentTreeItemOptions;
+    let outputConfig: LayerGroupContentTreeItemOptions;
 
     beforeAll(() => {
       app = new VcsUiApp();

@@ -7,9 +7,12 @@ import SwipeTool from '../../../src/swipeTool.js';
 import { SplitActionState } from '../../../src/swipeTree/layerSwipeTreeItem.js';
 
 describe('GroupSwipeTreeItem', () => {
-  let app;
-  let swipeTool;
-  function setupGroupItem() {
+  let app: VcsUiApp;
+  let swipeTool: SwipeTool;
+  function setupGroupItem(): {
+    item: GroupSwipeTreeItem;
+    children: SwipeTreeItem[];
+  } {
     const item = new GroupSwipeTreeItem({ name: 'foo' }, app);
     const childrenArray = item.getTreeViewItem().children;
     const children = [
@@ -34,8 +37,8 @@ describe('GroupSwipeTreeItem', () => {
   });
 
   describe('visibility', () => {
-    let item;
-    let children;
+    let item: SwipeTreeItem;
+    let children: SwipeTreeItem[];
 
     beforeAll(() => {
       ({ item, children } = setupGroupItem());
@@ -67,8 +70,8 @@ describe('GroupSwipeTreeItem', () => {
   });
 
   describe('split state', () => {
-    let item;
-    let children;
+    let item: SwipeTreeItem;
+    let children: SwipeTreeItem[];
 
     beforeAll(() => {
       ({ item, children } = setupGroupItem());
@@ -96,8 +99,8 @@ describe('GroupSwipeTreeItem', () => {
         c.splitState = splitState;
       });
       await sleep();
-      expect(item.splitState.left.value).to.equal(SplitActionState.ACTIVE);
-      expect(item.splitState.right.value).to.equal(SplitActionState.ACTIVE);
+      expect(item.splitState.left).to.equal(SplitActionState.ACTIVE);
+      expect(item.splitState.right).to.equal(SplitActionState.ACTIVE);
     });
 
     it('should have a split state of left/right INACTIVE, if all items have a state of left/right INACTIVE', async () => {
@@ -109,8 +112,8 @@ describe('GroupSwipeTreeItem', () => {
         c.splitState = splitState;
       });
       await sleep();
-      expect(item.splitState.left.value).to.equal(SplitActionState.INACTIVE);
-      expect(item.splitState.right.value).to.equal(SplitActionState.INACTIVE);
+      expect(item.splitState.left).to.equal(SplitActionState.INACTIVE);
+      expect(item.splitState.right).to.equal(SplitActionState.INACTIVE);
     });
 
     it('should have a split state of INDETERMINATE, if items left/right have differing states', async () => {
@@ -130,12 +133,8 @@ describe('GroupSwipeTreeItem', () => {
         right: SplitActionState.INACTIVE,
       };
       await sleep();
-      expect(item.splitState.left.value).to.equal(
-        SplitActionState.INDETERMINATE,
-      );
-      expect(item.splitState.right.value).to.equal(
-        SplitActionState.INDETERMINATE,
-      );
+      expect(item.splitState.left).to.equal(SplitActionState.INDETERMINATE);
+      expect(item.splitState.right).to.equal(SplitActionState.INDETERMINATE);
     });
   });
 });

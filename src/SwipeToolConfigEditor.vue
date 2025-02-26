@@ -1,5 +1,5 @@
 <template>
-  <AbstractConfigEditor @submit="apply" v-bind="{ ...$attrs, ...$props }">
+  <AbstractConfigEditor @submit="apply">
     <VcsFormSection
       heading="swipeTool.editor.general"
       expandable
@@ -52,7 +52,7 @@
               max="1.0"
               v-model.number="localConfig.splitPosition"
               :rules="[
-                (v) =>
+                (v: number) =>
                   (v >= 0 && v <= 1) || 'swipeTool.editor.splitPositionInvalid',
               ]"
             />
@@ -101,8 +101,8 @@
               id="name"
               :placeholder="$t('swipeTool.editor.swipeLayer.name')"
               :items="splitLayers"
-              :item-text="(item) => item.title"
-              :item-value="(item) => item.name"
+              :item-text="(item: LayerItem) => item.title"
+              :item-value="(item: LayerItem) => item.name"
               v-model="swipeLayerName"
             />
           </v-col>
@@ -118,7 +118,7 @@
   </AbstractConfigEditor>
 </template>
 
-<script>
+<script lang="ts">
   import { VContainer, VRow, VCol } from 'vuetify/components';
   import {
     AbstractConfigEditor,
@@ -129,41 +129,68 @@
     VcsCheckbox,
     VcsList,
     VcsFormButton,
+    type VcsUiApp,
+    type VcsListItem,
   } from '@vcmap/ui';
-  import { computed, inject, reactive, ref } from 'vue';
+  import {
+    computed,
+    defineComponent,
+    inject,
+    reactive,
+    Ref,
+    ref,
+    type PropType,
+  } from 'vue';
   import { moduleIdSymbol, volatileModuleId } from '@vcmap/core';
   import SwipeTool from './swipeTool.js';
+  import {
+    SplitDirectionKeys,
+    LayerStateOptions,
+    SwipeToolConfig,
+  } from './index.js';
 
-  function getState({ left, right }) {
-    if (left && right) {
+  function getState(state: {
+    left: boolean;
+    right: boolean;
+  }): LayerStateOptions {
+    if (state.left && state.right) {
       return { active: true };
-    } else if (left) {
-      return { active: true, splitDirection: 'left' };
-    } else if (right) {
-      return { active: true, splitDirection: 'right' };
+    } else if (state.left) {
+      return { active: true, splitDirection: SplitDirectionKeys.LEFT };
+    } else if (state.right) {
+      return { active: true, splitDirection: SplitDirectionKeys.RIGHT };
     }
     return { active: false };
   }
 
-  function getSwipeLayerNames(swipeLayerStates) {
+  function getSwipeLayerNames(
+    swipeLayerStates: Record<string, LayerStateOptions> | undefined,
+  ): string[] {
     if (swipeLayerStates) {
       return Object.keys(swipeLayerStates);
     }
     return [];
   }
 
-  function getTitle(app, layerName) {
-    return app.layers.getByKey(layerName)?.properties?.title || layerName;
+  function getTitle(app: VcsUiApp, layerName: string): string {
+    return (
+      (app.layers.getByKey(layerName)?.properties?.title as string) || layerName
+    );
   }
 
-  function createItem(name, title, swipeLayerStates, swipeLayerItems) {
+  function createItem(
+    name: string,
+    title: string,
+    swipeLayerStates: Record<string, LayerStateOptions>,
+    swipeLayerItems: Ref<VcsListItem[]>,
+  ): VcsListItem {
     const state = {
       left:
         swipeLayerStates[name].active &&
-        swipeLayerStates[name].splitDirection === 'left',
+        swipeLayerStates[name].splitDirection === SplitDirectionKeys.LEFT,
       right:
         swipeLayerStates[name].active &&
-        swipeLayerStates[name].splitDirection === 'right',
+        swipeLayerStates[name].splitDirection === SplitDirectionKeys.RIGHT,
     };
     return {
       name,
@@ -193,7 +220,7 @@
         }),
         {
           name: 'swipeTool.editor.swipeLayer.remove',
-          callback() {
+          callback(): void {
             const idx = swipeLayerItems.value.findIndex((i) => i.name === name);
             swipeLayerItems.value.splice(idx, 1);
             delete swipeLayerStates[name];
@@ -203,7 +230,9 @@
     };
   }
 
-  export default {
+  type LayerItem = { name: string; title: string };
+
+  export default defineComponent({
     name: 'SwipeToolConfigEditor',
     components: {
       VContainer,
@@ -220,38 +249,45 @@
     },
     props: {
       getConfig: {
-        type: Function,
+        type: Function as PropType<() => SwipeToolConfig>,
         required: true,
       },
       setConfig: {
-        type: Function,
+        type: Function as PropType<(config: object | undefined) => void>,
         required: true,
       },
     },
     setup(props) {
-      const app = inject('vcsApp');
-      const swipeElementTitles = ref({});
-      const swipeLayerNames = ref([]);
-      const swipeLayerItems = ref([]);
+      const app = inject('vcsApp') as VcsUiApp;
+      const defaultOptions = SwipeTool.getDefaultOptions();
+      const config = props.getConfig();
+      const localConfig = ref<SwipeToolConfig>(
+        Object.assign(defaultOptions, config),
+      );
+
+      const swipeElementTitles = ref(
+        localConfig.value.swipeElementTitles || { left: '', right: '' },
+      );
+      const enableSwipeElementTitle = ref(
+        !!Object.values(swipeElementTitles.value).some((t) => !!t),
+      );
+      const swipeLayerNames = ref<string[]>([]);
+      const swipeLayerItems = ref<VcsListItem[]>([]);
       const swipeLayerName = ref('');
-      const splitLayers = computed(() =>
+      const splitLayers = computed<LayerItem[]>(() =>
         [...app.layers]
           .filter(
             (l) =>
               l[moduleIdSymbol] !== volatileModuleId &&
+              !('vectorClusterGroup' in l) &&
+              'splitDirection' in l &&
               l.splitDirection !== undefined &&
               !swipeLayerNames.value.includes(l.name),
           )
-          .map((l) => ({ name: l.name, title: l.properties?.title || l.name })),
-      );
-
-      const localConfig = ref({});
-      const defaultOptions = SwipeTool.getDefaultOptions();
-      const config = props.getConfig();
-      localConfig.value = Object.assign(defaultOptions, config);
-      swipeElementTitles.value = localConfig.value.swipeElementTitles || {};
-      const enableSwipeElementTitle = ref(
-        !!Object.keys(swipeElementTitles.value).length,
+          .map((l) => ({
+            name: l.name,
+            title: (l.properties?.title as string) || l.name,
+          })),
       );
 
       swipeLayerNames.value = getSwipeLayerNames(config.swipeLayerStates);
@@ -259,43 +295,10 @@
         createItem(
           name,
           getTitle(app, name),
-          localConfig.value.swipeLayerStates,
+          localConfig.value.swipeLayerStates!,
           swipeLayerItems,
         ),
       );
-
-      const addSwipeLayer = () => {
-        if (!localConfig.value.swipeLayerStates) {
-          localConfig.value.swipeLayerStates = {};
-        }
-        localConfig.value.swipeLayerStates[swipeLayerName.value] = {
-          active: app.layers.getByKey(swipeLayerName.value)?.active,
-        };
-        swipeLayerNames.value = getSwipeLayerNames(
-          localConfig.value.swipeLayerStates,
-        );
-        swipeLayerItems.value = swipeLayerNames.value.map((name) =>
-          createItem(
-            name,
-            getTitle(app, name),
-            localConfig.value.swipeLayerStates,
-            swipeLayerItems,
-          ),
-        );
-        swipeLayerName.value = '';
-      };
-
-      const apply = () => {
-        if (enableSwipeElementTitle.value) {
-          localConfig.value.swipeElementTitles = swipeElementTitles.value;
-        } else {
-          delete localConfig.value.swipeElementTitles;
-        }
-        if (swipeLayerNames.value.length < 1) {
-          localConfig.value.swipeLayerStates = undefined;
-        }
-        props.setConfig(localConfig.value);
-      };
 
       return {
         localConfig,
@@ -304,11 +307,40 @@
         splitLayers,
         swipeLayerName,
         swipeLayerItems,
-        apply,
-        addSwipeLayer,
+        addSwipeLayer(): void {
+          if (!localConfig.value.swipeLayerStates) {
+            localConfig.value.swipeLayerStates = {};
+          }
+          localConfig.value.swipeLayerStates[swipeLayerName.value] = {
+            active: !!app.layers.getByKey(swipeLayerName.value)?.active,
+          };
+          swipeLayerNames.value = getSwipeLayerNames(
+            localConfig.value.swipeLayerStates,
+          );
+          swipeLayerItems.value = swipeLayerNames.value.map((name) =>
+            createItem(
+              name,
+              getTitle(app, name),
+              localConfig.value.swipeLayerStates!,
+              swipeLayerItems,
+            ),
+          );
+          swipeLayerName.value = '';
+        },
+        apply(): void {
+          if (enableSwipeElementTitle.value) {
+            localConfig.value.swipeElementTitles = swipeElementTitles.value;
+          } else {
+            delete localConfig.value.swipeElementTitles;
+          }
+          if (swipeLayerNames.value.length < 1) {
+            localConfig.value.swipeLayerStates = undefined;
+          }
+          props.setConfig(localConfig.value);
+        },
       };
     },
-  };
+  });
 </script>
 
 <style scoped></style>

@@ -1,4 +1,9 @@
 import { watch } from 'vue';
+import {
+  callSafeAction,
+  type ContentTreeItemOptions,
+  type VcsUiApp,
+} from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import {
   createSplitStateRefActions,
@@ -13,110 +18,84 @@ import SwipeTreeItem from './swipeTreeItem.js';
  * @extends {import("@vcmap/ui").ContentTreeItem}
  */
 class GroupSwipeTreeItem extends SwipeTreeItem {
-  /**
-   * @returns {string}
-   */
-  static get className() {
+  static get className(): string {
     return 'GroupSwipeTreeItem';
   }
 
-  /**
-   * @param {import("@vcmap/ui").ContentTreeItemOptions} options
-   * @param {import("@vcmap/ui").VcsUiApp} app
-   */
-  constructor(options, app) {
-    super(options, app);
-    /**
-     * @type {Array<Function>}
-     * @private
-     */
-    this._listeners = [];
+  private _listeners: Array<() => void> = [];
 
-    /**
-     * @type {function():void}
-     * @private
-     */
+  private _childWatcher: () => void;
+
+  private _destroyWatcher: (() => void) | undefined;
+
+  constructor(options: ContentTreeItemOptions, app: VcsUiApp) {
+    super(options, app);
+
     this._childWatcher = watch(
       this._children,
       () => {
         const children = this._children.value;
         this.visible = children.some((c) => c.visible);
-
-        const states = children.map((c) => ({
-          left: c.splitState?.left,
-          right: c.splitState?.right,
-        }));
+        const states = children.map(({ splitState }) => splitState);
         this.splitState = getGroupStates(states);
       },
       { deep: true },
     );
 
-    this._destroyWatcher = null;
-
     this._setup();
   }
 
-  /**
-   * @private
-   */
-  _setSwipeActions() {
+  private _setSwipeActions(): void {
     this.removeAction('split-right');
     this.removeAction('split-left');
 
-    const cb = (dir) => {
+    const cb = (dir: SplitDirection): void => {
       this._children.value.forEach(({ actions }) => {
         if (dir === SplitDirection.LEFT) {
-          const active = this.splitState.left.value === SplitActionState.ACTIVE;
+          const active = this.splitState.left === SplitActionState.ACTIVE;
           actions
             .filter((a) => a.name === 'split-left' && a.active === active)
-            .forEach((a) => a.callback());
+            .forEach((a) => {
+              callSafeAction(a);
+            });
         } else if (dir === SplitDirection.RIGHT) {
-          const active =
-            this.splitState.right.value === SplitActionState.ACTIVE;
+          const active = this.splitState.right === SplitActionState.ACTIVE;
           actions
             .filter((a) => a.name === 'split-right' && a.active === active)
-            .forEach((a) => a.callback());
+            .forEach((a) => {
+              callSafeAction(a);
+            });
         }
       });
     };
 
     const { actions, destroy } = createSplitStateRefActions(
-      this._splitState,
+      this.splitState,
       cb,
     );
     actions.forEach((a) => this.addAction(a));
     this._destroyWatcher = destroy;
   }
 
-  /**
-   * @private
-   */
-  _setup() {
+  private _setup(): void {
     this._setSwipeActions();
     this.splitState = getGroupStates(
-      this._children.value.map((c) => c.splitState),
+      this._children.value.map(({ splitState }) => splitState),
     );
   }
 
-  /**
-   * @private
-   */
-  _clearListeners() {
+  private _clearListeners(): void {
     this._listeners.forEach((cb) => {
       cb();
     });
     this._listeners.splice(0);
   }
 
-  /**
-   * @inheritDoc
-   */
-  destroy() {
+  destroy(): void {
     this._clearListeners();
     super.destroy();
-    if (this._destroyWatcher) {
-      this._destroyWatcher();
-    }
+    this._destroyWatcher?.();
+    this._childWatcher?.();
   }
 }
 

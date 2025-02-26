@@ -2,7 +2,7 @@
   <div>
     <div v-if="trees.length > 0">
       <VcsFormSection v-for="(tree, idx) in trees" :key="subTreeIds[idx]">
-        <template #header>
+        <template #header v-if="tree">
           <article class="pa-2 vcm-tree-header">
             <div
               class="form-section-header d-flex align-center swipe-tree-header"
@@ -36,6 +36,60 @@
     </p>
   </div>
 </template>
+
+<script lang="ts">
+  import { computed, defineComponent, inject, ref } from 'vue';
+  import { VIcon } from 'vuetify/components';
+  import { openStateMapSymbol, VcsFormSection, VcsTreeview } from '@vcmap/ui';
+  import type { VcsUiApp } from '@vcmap/ui';
+  import type { SwipeToolPlugin } from './index.js';
+  import { name } from '../package.json';
+
+  /**
+   * Component rendering a swipe tree with split actions derived from the content tree.
+   * Contains css styling for the SwipeElement.
+   */
+  export default defineComponent({
+    name: 'SwipeToolComponent',
+    components: {
+      VcsFormSection,
+      VcsTreeview,
+      VIcon,
+    },
+    setup() {
+      const app = inject('vcsApp') as VcsUiApp;
+      const plugin = app.plugins.getByKey(name) as SwipeToolPlugin;
+      const { subTreeIds } = plugin.swipeTool;
+      const opened = ref();
+
+      // @ts-expect-error - the openStateMapSymbol is not exposed
+      const openStateMap = app.contentTree[openStateMapSymbol] as Map<
+        string,
+        string[]
+      >;
+      if (openStateMap && openStateMap.has(app.maps.activeMap!.name)) {
+        opened.value = openStateMap.get(app.maps.activeMap!.name);
+      } else {
+        opened.value = subTreeIds.value.flatMap((id) =>
+          app.contentTree.getTreeOpenState(id),
+        );
+      }
+
+      const trees = computed(() => {
+        return subTreeIds.value.flatMap(
+          (id) => plugin.swipeTool.getComputedVisibleTree(id).value,
+        );
+      });
+
+      return {
+        subTreeIds,
+        trees,
+        opened,
+      };
+    },
+  });
+</script>
+
 <style lang="scss">
   .swipe-tree-header {
     height: 17px;
@@ -104,47 +158,3 @@
     background-color: rgb(var(--v-theme-base-lighten-3));
   }
 </style>
-<script>
-  import { computed, inject, ref } from 'vue';
-  import { VIcon } from 'vuetify/components';
-  import { openStateMapSymbol, VcsFormSection, VcsTreeview } from '@vcmap/ui';
-  import { name } from '../package.json';
-
-  /**
-   * Component rendering a swipe tree with split actions derived from the content tree.
-   * Contains css styling for the SwipeElement.
-   */
-  export default {
-    name: 'SwipeTool',
-    components: {
-      VcsFormSection,
-      VcsTreeview,
-      VIcon,
-    },
-    setup() {
-      const app = inject('vcsApp');
-      const plugin = app.plugins.getByKey(name);
-      const { subTreeIds } = plugin.swipeTool;
-      const opened = ref();
-      if (app.contentTree[openStateMapSymbol]?.size) {
-        opened.value = [...app.contentTree[openStateMapSymbol].values()][0];
-      } else {
-        opened.value = subTreeIds.value.flatMap((id) =>
-          app.contentTree.getTreeOpenState(id),
-        );
-      }
-
-      const trees = computed(() => {
-        return subTreeIds.value.map(
-          (id) => plugin.swipeTool.getComputedVisibleTree(id).value,
-        );
-      });
-
-      return {
-        subTreeIds,
-        trees,
-        opened,
-      };
-    },
-  };
-</script>

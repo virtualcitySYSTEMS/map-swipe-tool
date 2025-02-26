@@ -1,6 +1,6 @@
 import deepEqual from 'fast-deep-equal';
 import { parseBoolean, parseNumber } from '@vcsuite/parsers';
-import { check, checkMaybe } from '@vcsuite/check';
+import { check, maybe, ofEnum } from '@vcsuite/check';
 import {
   GroupContentTreeItem,
   LayerContentTreeItem,
@@ -8,11 +8,26 @@ import {
   NodeContentTreeItem,
   SubContentTreeItem,
 } from '@vcmap/ui';
-import { computed, ref } from 'vue';
+import type {
+  ContentTreeCollection,
+  ContentTreeItem,
+  LayerContentTreeItemOptions,
+  LayerGroupContentTreeItemOptions,
+  TreeViewItem,
+  VcsUiApp,
+} from '@vcmap/ui';
+import { computed, ComputedRef, ref, type Ref } from 'vue';
 import { SplitDirection } from '@vcmap-cesium/engine';
-import { VcsEvent } from '@vcmap/core';
+import {
+  type Layer,
+  type SplitLayer,
+  VcsEvent,
+  VectorLayer,
+} from '@vcmap/core';
 import SwipeElement from './swipeElement.js';
-import LayerSwipeTreeItem from './swipeTree/layerSwipeTreeItem.js';
+import LayerSwipeTreeItem, {
+  type LayerSwipeTreeItemOptions,
+} from './swipeTree/layerSwipeTreeItem.js';
 import {
   setupSwipeToolActions,
   setupSwipeToolActionsNoUI,
@@ -20,27 +35,39 @@ import {
 } from './actionHelper.js';
 import GroupSwipeTreeItem from './swipeTree/groupSwipeTreeItem.js';
 import LayerGroupSwipeTreeItem from './swipeTree/layerGroupSwipeTreeItem.js';
+import {
+  SplitDirectionKeys,
+  type SwipeElementTitles,
+  type LayerStateOptions,
+  type SwipeToolConfig,
+} from './index.js';
+import { SwipeTreeViewItem } from './swipeTree/swipeTreeItem.js';
+
+export type SplitableLayer = Layer & SplitLayer;
 
 /**
- * @param {SwipeLayerOptions} options
+ * @param {LayerStateOptions} options
  * @returns {SwipeLayerState}
  */
-export function parseSwipeLayerState(options) {
+export function parseSwipeLayerState(
+  options: LayerStateOptions,
+): SwipeLayerState {
   check(options.active, Boolean);
-  checkMaybe(options.splitDirection, String);
+  check(options.splitDirection, maybe(ofEnum(SplitDirectionKeys)));
   const key = options.splitDirection?.toUpperCase();
 
   return {
     active: options.active,
-    splitDirection: SplitDirection[key] ?? SplitDirection.NONE,
+    splitDirection: key
+      ? SplitDirection[key as keyof typeof SplitDirection]
+      : SplitDirection.NONE,
   };
 }
 
-/**
- * @typedef {Object} SwipeLayerState
- * @property {import("@vcmap-cesium/engine").SplitDirection} splitDirection
- * @property {boolean} active
- */
+export type SwipeLayerState = {
+  splitDirection: SplitDirection;
+  active: boolean;
+};
 
 /**
  * This widget allows to swipe split views of a {@link @vcmap/core.CesiumMap} or {@link @vcmap/core.OpenlayersMap} map.
@@ -48,21 +75,46 @@ export function parseSwipeLayerState(options) {
  * using their splitDirection property. This widget provides a {@link SwipeElement} to
  * swipe the split position. Changing the splitDirection property while the widget is active is tracked. Once
  * the widget is deactivated, the layer state previous its activation is reimplemented.
- * @class
- * @export
- * @api
  */
-class SwipeTool {
-  static get className() {
+export class SwipeTool {
+  static get className(): string {
     return 'SwipeTool';
   }
 
+  private _app: VcsUiApp;
+
+  private _active = false;
+
+  private _splitPosition: number;
+
+  private _showSwipeTree: boolean;
+
+  private _showSwipeElement: boolean;
+
+  private _swipeElementTitles?: SwipeElementTitles;
+
+  private _swipeElement: SwipeElement;
+
+  swipeLayerStates: Record<string, LayerStateOptions>;
+
+  private _cachedState: Record<string, SwipeLayerState> = {};
+
+  private _initialState: Record<string, SwipeLayerState> = {};
+
+  private _subTreeIds: Ref<string[]> = ref([]);
+
+  private _subTreeViewItems: Map<string, SwipeTreeViewItem> = new Map();
+
+  stateChanged: VcsEvent<boolean> = new VcsEvent();
+
+  private _listeners: Array<() => void>;
+
+  private _destroyActions: () => void;
+
   /**
    * Returns the default options for this Widget
-   * @api
-   * @returns {SwipeToolConfig}
    */
-  static getDefaultOptions() {
+  static getDefaultOptions(): SwipeToolConfig {
     return {
       showSwipeTree: true,
       showSwipeElement: true,
@@ -72,67 +124,30 @@ class SwipeTool {
     };
   }
 
-  /**
-   * @param {import("@vcmap/ui").VcsUiApp} app
-   * @param {SwipeToolConfig} options
-   */
-  constructor(app, options) {
+  constructor(app: VcsUiApp, options: SwipeToolConfig) {
     const defaultOptions = SwipeTool.getDefaultOptions();
 
-    /**
-     * @type {import("@vcmap/ui").VcsUiApp}
-     * @private
-     */
     this._app = app;
-    /**
-     * @type {boolean}
-     * @private
-     */
-    this._active = false;
-    /**
-     * @type {number}
-     * @private
-     */
+
     this._splitPosition = parseNumber(
       options.splitPosition,
       SwipeTool.getDefaultOptions().splitPosition,
     );
-    /**
-     * @type {boolean}
-     * @private
-     */
     this._showSwipeTree = parseBoolean(
       options.showSwipeTree,
       defaultOptions.showSwipeTree,
     );
-    /**
-     * @type {boolean}
-     * @private
-     */
     this._showSwipeElement = parseBoolean(
       options.showSwipeElement,
       defaultOptions.showSwipeElement,
     );
-    /**
-     * @type {Object<string, string>|undefined}
-     * @private
-     */
     this._swipeElementTitles =
       options.swipeElementTitles || defaultOptions.swipeElementTitles;
-    /**
-     * @type {SwipeElement}
-     * @private
-     */
+
     this._swipeElement = new SwipeElement(app, this._swipeElementTitles);
-    /**
-     * @type {Object<string,SwipeLayerOptions>}
-     */
-    this.swipeLayerStates = options.swipeLayerStates;
-    /**
-     * @type {Object<string,SwipeLayerState>}
-     * @private
-     */
-    this._cachedState = {};
+
+    this.swipeLayerStates = options.swipeLayerStates ?? {};
+
     if (options.swipeLayerStates) {
       Object.entries(this.swipeLayerStates).forEach(
         ([layerName, swipeLayerOptions]) => {
@@ -141,26 +156,6 @@ class SwipeTool {
         },
       );
     }
-    /**
-     * @type {Object<string,SwipeLayerState>}
-     * @private
-     */
-    this._initialState = {};
-    /**
-     * @type {import("vue").Ref<Array<string>>}
-     * @private
-     */
-    this._subTreeIds = ref([]);
-    /**
-     * @type {Map<string, import("@vcmap/ui").TreeViewItem>}
-     * @private
-     */
-    this._subTreeViewItems = new Map();
-    /**
-     * @type {import("@vcmap/core").VcsEvent<boolean>}
-     */
-    this.stateChanged = new VcsEvent();
-
     this._listeners = [
       app.contentTree.added.addEventListener(this.handleItemAdded.bind(this)),
       app.contentTree.removed.addEventListener(this.setTreeView.bind(this)),
@@ -169,34 +164,20 @@ class SwipeTool {
         this._splitPosition = position;
       }),
     ];
-    /**
-     * @type {function(): void}
-     * @private
-     */
     this._destroyActions = this._showSwipeTree
       ? setupSwipeToolActions(this._app, this)
       : setupSwipeToolActionsNoUI(this._app, this);
   }
 
-  /**
-   * @type {boolean}
-   * @readonly
-   */
-  get active() {
+  get active(): boolean {
     return this._active;
   }
 
-  /**
-   * @type {number}
-   */
-  get splitPosition() {
+  get splitPosition(): number {
     return this._splitPosition;
   }
 
-  /**
-   * @param {number} position
-   */
-  set splitPosition(position) {
+  set splitPosition(position: number) {
     check(position, Number);
     if (position < 0 || position > 1) {
       throw new Error('Position must be between 0 and 1');
@@ -207,17 +188,11 @@ class SwipeTool {
     }
   }
 
-  /**
-   * @type {boolean}
-   */
-  get showSwipeElement() {
+  get showSwipeElement(): boolean {
     return this._showSwipeElement;
   }
 
-  /**
-   * @param {boolean} value
-   */
-  set showSwipeElement(value) {
+  set showSwipeElement(value: boolean) {
     check(value, Boolean);
     this._showSwipeElement = value;
     if (value) {
@@ -227,17 +202,11 @@ class SwipeTool {
     }
   }
 
-  /**
-   * @type {boolean}
-   */
-  get showSwipeTree() {
+  get showSwipeTree(): boolean {
     return this._showSwipeTree;
   }
 
-  /**
-   * @param {boolean} value
-   */
-  set showSwipeTree(value) {
+  set showSwipeTree(value: boolean) {
     check(value, Boolean);
     this._showSwipeTree = value;
     this._destroyActions();
@@ -246,19 +215,13 @@ class SwipeTool {
       : setupSwipeToolActionsNoUI(this._app, this);
   }
 
-  /**
-   * The title present on the swipe element.
-   * @type {Object<string, string>|undefined}
-   */
-  get swipeElementTitles() {
+  /** The title present on the swipe element. */
+  get swipeElementTitles(): SwipeElementTitles | undefined {
     return this._swipeElementTitles;
   }
 
-  /**
-   * @param {Object<string, string>|undefined} titles
-   */
-  set swipeElementTitles(titles) {
-    checkMaybe(titles, Object);
+  set swipeElementTitles(titles: SwipeElementTitles | undefined) {
+    check(titles, maybe(Object));
 
     this._swipeElementTitles = titles;
     if (this._swipeElement) {
@@ -266,18 +229,12 @@ class SwipeTool {
     }
   }
 
-  /**
-   * @type {SwipeElement}
-   * @readonly
-   */
-  get swipeElement() {
+  get swipeElement(): SwipeElement {
     return this._swipeElement;
   }
 
-  /**
-   * activates swipe tool by applying state
-   */
-  activate() {
+  /** Activates swipe tool by applying state */
+  activate(): void {
     if (!this._active) {
       this._app.maps.splitPosition = this._splitPosition;
       if (this._showSwipeElement) {
@@ -291,10 +248,8 @@ class SwipeTool {
     }
   }
 
-  /**
-   * deactivating swipe tool by resetting state and clearing swipe tree
-   */
-  deactivate() {
+  /** Deactivating swipe tool by resetting state and clearing swipe tree */
+  deactivate(): void {
     if (this._active) {
       this._splitPosition = this._app.maps.splitPosition;
       this._swipeElement.deactivate();
@@ -314,13 +269,12 @@ class SwipeTool {
    * Takes a mapped SwipeTreeItem and handles its children.
    * Removes all other actions than split actions.
    * Returns a mapped TreeViewItem to be used within SwipeTree
-   * @param {import("@vcmap/ui").ContentTreeItem} mappedItem
-   * @param {import("@vcmap/ui").TreeViewItem} item
-   * @param {import("@vcmap/ui").ContentTreeCollection} contentTree
-   * @returns {import("@vcmap/ui").TreeViewItem|null}
-   * @private
    */
-  _handleChildren(mappedItem, item, contentTree) {
+  private _handleChildren(
+    mappedItem: ContentTreeItem,
+    item: TreeViewItem,
+    contentTree: ContentTreeCollection,
+  ): SwipeTreeViewItem {
     mappedItem.getTreeViewItem().children = item.children
       .map((c) => this._mapTreeItems(c, contentTree))
       .filter((c) => !!c);
@@ -331,27 +285,36 @@ class SwipeTool {
       .map((a) => a.name)
       .filter((name) => name !== 'split-right' && name !== 'split-left');
     actionsToRemove.forEach((name) => mappedItem.removeAction(name));
-    return mappedItem.getTreeViewItem();
+    return mappedItem.getTreeViewItem() as SwipeTreeViewItem;
   }
 
-  /**
-   * maps ContentTreeItems to SwipeTreeItems
-   * @param {import("@vcmap/ui").TreeViewItem} item
-   * @param {import("@vcmap/ui").ContentTreeCollection} contentTree
-   * @returns {import("@vcmap/ui").TreeViewItem|null}
-   * @private
-   */
-  _mapTreeItems(item, contentTree) {
-    const i = contentTree.getByKey(item.name);
+  /** Maps ContentTreeItems to SwipeTreeItems */
+  private _mapTreeItems(
+    item: TreeViewItem,
+    contentTree: ContentTreeCollection,
+  ): SwipeTreeViewItem | null {
+    const i = contentTree.getByKey(item.name)!;
     let mappedItem;
     const options = i.toJSON();
     if (i instanceof LayerContentTreeItem) {
-      const layer = this._app.maps.layerCollection.getByKey(options.layerName);
-      if (layer && layer.splitDirection !== undefined) {
-        mappedItem = new LayerSwipeTreeItem(options, this._app);
+      const layer = this._app.maps.layerCollection.getByKey(
+        (options as LayerContentTreeItemOptions).layerName,
+      );
+      if (layer instanceof VectorLayer && layer.vectorClusterGroup) {
+        return null;
+      }
+
+      if (layer && (layer as SplitableLayer).splitDirection !== undefined) {
+        mappedItem = new LayerSwipeTreeItem(
+          options as LayerSwipeTreeItemOptions,
+          this._app,
+        );
       }
     } else if (i instanceof LayerGroupContentTreeItem) {
-      mappedItem = new LayerGroupSwipeTreeItem(options, this._app);
+      mappedItem = new LayerGroupSwipeTreeItem(
+        options as LayerGroupContentTreeItemOptions,
+        this._app,
+      );
     } else if (i instanceof GroupContentTreeItem) {
       mappedItem = new GroupSwipeTreeItem(options, this._app);
     } else if (i instanceof NodeContentTreeItem) {
@@ -361,7 +324,6 @@ class SwipeTool {
     if (mappedItem) {
       return this._handleChildren(mappedItem, item, contentTree);
     }
-
     return null;
   }
 
@@ -371,7 +333,7 @@ class SwipeTool {
    * Called whenever content tree changes.
    * Might be extended in future to support further sources apart from content tree.
    */
-  setTreeView() {
+  setTreeView(): void {
     this._clearSwipeTree();
     if (this._active && this._showSwipeTree) {
       [...this._app.contentTree.subTreeViewItems.value.values()].forEach(
@@ -396,41 +358,31 @@ class SwipeTool {
     }
   }
 
-  /**
-   * All ids of the currently managed subtrees. Ids are not persisted and will change if
-   * the trees get recalculated.
-   * @type {import("vue").Ref<Array<string>>}
-   * @readonly
-   */
-  get subTreeIds() {
+  /** All ids of the currently managed subtrees. Ids are not persisted and will change if
+   * the trees get recalculated. */
+  get subTreeIds(): Ref<string[]> {
     return this._subTreeIds;
   }
 
-  /**
-   * @param {string} id
-   * @returns {import("vue").ComputedRef<Array<import("vuetify").TreeViewItem>>}
-   */
-  getComputedVisibleTree(id) {
+  getComputedVisibleTree(id: string): ComputedRef<SwipeTreeViewItem[]> {
     return computed(() => {
       if (this._subTreeViewItems.has(id)) {
-        return this._subTreeViewItems.get(id);
+        return [this._subTreeViewItems.get(id)].filter(
+          (item): item is SwipeTreeViewItem => item !== undefined,
+        );
       }
       return [];
     });
   }
 
-  /**
-   * @private
-   */
-  _clearSwipeTree() {
+  private _clearSwipeTree(): void {
     this._subTreeViewItems.clear();
     this._subTreeIds.value.splice(0);
   }
 
-  /**
-   * clears swipeTool by removing all items of managed layers and resetting initial state
-   */
-  clear() {
+  /** Clears swipeTool by removing all items of managed layers and resetting initial state */
+
+  clear(): void {
     this.applyState(this._initialState);
     this._cachedState = {};
     this._initialState = {};
@@ -440,40 +392,41 @@ class SwipeTool {
   /**
    * Iterates over content tree collection and returns current SwipeLayerState
    * for all layers of LayerContentTreeItem and LayerGroupContentTreeItem.
-   * @returns {Object<string,SwipeLayerState>}
    */
-  getState() {
+  getState(): Record<string, SwipeLayerState> {
     const layerStates = [...this._app.contentTree]
       .map((item) => {
         const options = item.toJSON();
-        return options.layerName || options.layerNames || [];
+        if ((options as LayerContentTreeItemOptions).layerName) {
+          return [(options as LayerContentTreeItemOptions).layerName];
+        } else if ((options as LayerGroupContentTreeItemOptions).layerNames) {
+          return (options as LayerGroupContentTreeItemOptions).layerNames;
+        }
+        return [];
       })
       .flat()
       .filter(
         (layerName) =>
-          this._app.layers.getByKey(layerName)?.splitDirection !== undefined,
+          (this._app.layers.getByKey(layerName) as SplitableLayer)
+            ?.splitDirection !== undefined,
       )
       .map((name) => {
-        const { active, splitDirection } = this._app.layers.getByKey(name);
+        const { active, splitDirection } = this._app.layers.getByKey(
+          name,
+        ) as SplitableLayer;
         return [name, { active, splitDirection }];
       });
-    return Object.fromEntries(layerStates);
+    return Object.fromEntries(layerStates) as Record<string, SwipeLayerState>;
   }
 
-  /**
-   * Sets SwipeLayerState and applies it, if active.
-   * @param {Object<string,SwipeLayerState>} state
-   */
-  setState(state) {
+  /** Sets SwipeLayerState and applies it, if active. */
+  setState(state: Record<string, SwipeLayerState>): void {
     this._cachedState = state;
     this.applyState(this._cachedState);
   }
 
-  /**
-   * Iterate over all cached SwipeLayerStates and apply state on the layer
-   * @param {Object<string,SwipeLayerState>} state
-   */
-  applyState(state) {
+  /** Iterate over all cached SwipeLayerStates and apply state on the layer */
+  applyState(state: Record<string, SwipeLayerState>): void {
     if (this._active) {
       Object.entries(state).forEach(([layerName, layerSwipeState]) => {
         this._applyStateToLayer(layerName, layerSwipeState);
@@ -481,36 +434,43 @@ class SwipeTool {
     }
   }
 
-  /**
-   * @param {string} layerName
-   * @param {SwipeLayerState} layerSwipeState
-   * @private
-   */
-  _applyStateToLayer(layerName, layerSwipeState) {
+  private _applyStateToLayer(
+    layerName: string,
+    layerSwipeState: SwipeLayerState,
+  ): void {
     const layer = this._app.maps.layerCollection.getByKey(layerName);
-    if (layer && layer.splitDirection !== undefined) {
+    if (
+      layer &&
+      'splitDirection' in layer &&
+      layer.splitDirection !== undefined
+    ) {
       layer.splitDirection = layerSwipeState.splitDirection;
       if (layer.active !== layerSwipeState.active) {
         if (layer.active) {
           layer.deactivate();
         } else {
-          layer.activate();
+          // eslint-disable-next-line no-void
+          void layer.activate();
         }
       }
     }
   }
 
-  /**
-   * Handles items added to the content tree
-   * @param {import("@vcmap/ui").ContentTreeItem} item
-   */
-  handleItemAdded(item) {
+  /** Handles items added to the content tree */
+  handleItemAdded(item: ContentTreeItem): void {
     const options = item.toJSON();
-    const layerNames = [options?.layerName] || options?.layerNames || [];
+    const layerNames = [];
+    if ((options as LayerContentTreeItemOptions).layerName) {
+      layerNames.push((options as LayerContentTreeItemOptions).layerName);
+    } else if ((options as LayerGroupContentTreeItemOptions).layerNames) {
+      layerNames.push(
+        ...(options as LayerGroupContentTreeItemOptions).layerNames,
+      );
+    }
     layerNames.forEach((layerName) => {
       const layer = this._app.layers.getByKey(layerName);
       if (layer) {
-        const { active, splitDirection } = layer;
+        const { active, splitDirection } = layer as SplitableLayer;
         this._initialState[layerName] = { active, splitDirection };
         if (this._cachedState[layerName]) {
           if (this._active) {
@@ -521,11 +481,8 @@ class SwipeTool {
     });
   }
 
-  /**
-   * @returns {SwipeToolConfig}
-   */
-  toJSON() {
-    const config = {};
+  toJSON(): SwipeToolConfig {
+    const config: SwipeToolConfig = {};
     const defaultOptions = SwipeTool.getDefaultOptions();
     if (this.showSwipeTree !== defaultOptions.showSwipeTree) {
       config.showSwipeTree = this.showSwipeTree;
@@ -548,7 +505,7 @@ class SwipeTool {
     return config;
   }
 
-  destroy() {
+  destroy(): void {
     this.deactivate();
     this.clear();
     this.stateChanged.destroy();

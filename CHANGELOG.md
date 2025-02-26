@@ -1,6 +1,8 @@
-# v2.0.2
+# v3.0.0
 
+- Convert SwipeTool plugin to TypeScript
 - Makes the open state of the groups match the ContentTree on startup
+- Fixes a bug where the initial open state of groups would not be respected
 
 # v2.0.1
 

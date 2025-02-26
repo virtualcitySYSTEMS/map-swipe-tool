@@ -1,13 +1,13 @@
 {
   "name": "@vcmap/swipe-tool",
-  "version": "2.0.1",
+  "version": "3.0.0-rc.1",
   "description": "A VC Map plugin to swipe split views.",
   "type": "module",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "prepublishOnly": "vcmplugin build",
     "build": "vcmplugin build",
-    "pack": "vcmplugin pack",
+    "bundle": "vcmplugin bundle",
     "start": "vcmplugin serve",
     "preview": "vcmplugin preview",
     "buildStagingApp": "vcmplugin buildStagingApp",
@@ -17,7 +17,8 @@
     "format": "prettier --write --list-different . && npm run lint:js -- --fix",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "coverage:gitlab": "vitest run --coverage --reporter junit --outputFile test-report.xml"
+    "type-check": "vue-tsc --noEmit",
+    "ensure-types": "vcmplugin ensure-types"
   },
   "author": "Roland Ruhdorfer <rruhdorfer@vc.systems>",
   "license": "MIT",
@@ -34,47 +35,44 @@
     "CHANGELOG.md"
   ],
   "exports": {
-    ".": "./src/index.js",
+    ".": "dist/index.js",
     "./dist": "./dist/index.js"
   },
   "eslintIgnore": [
     "node_modules",
     "dist",
-    "coverage",
-    "*timestamp-*.mjs"
+    "plugin-assets"
   ],
-  "eslintConfig": {
-    "root": true,
-    "extends": "@vcsuite/eslint-config/vue"
-  },
-  "dependencies": {
-    "@vcsuite/check": "^1.1.2",
-    "@vcsuite/logger": "^1.0.1",
-    "@vcsuite/parsers": "^1.0.3",
-    "fast-deep-equal": "^3.1.3",
-    "uuid": "^9.0.1"
-  },
+  "prettier": "@vcsuite/eslint-config/prettier.js",
   "peerDependencies": {
     "@vcmap-cesium/engine": "^11.0.2",
     "@vcmap/core": "^6.1.0-rc.5",
-    "@vcmap/ui": "^6.1.0-rc.6",
+    "@vcmap/ui": "git+ssh://git@gitlab.virtualcitysystems.de/vcsuite/npm/vcmap/ui.git#main",
     "ol": "^10.4.0",
     "vue": "~3.4.38",
     "vuetify": "^3.7.11"
   },
   "overrides": {
     "@vcmap/core": "^6.1.0-rc.5",
-    "@vcmap/ui": "^6.1.0-rc.6"
+    "@vcmap/ui": "git+ssh://git@gitlab.virtualcitysystems.de/vcsuite/npm/vcmap/ui.git#main",
+    "esbuild": "0.25.0"
   },
   "devDependencies": {
     "@vcmap/plugin-cli": "^4.0.2",
-    "@vcsuite/eslint-config": "^3.0.6",
+    "@vcsuite/eslint-config": "^3.0.8",
     "@vitest/coverage-v8": "^2.1.9",
     "jest-canvas-mock": "^2.5.2",
-    "jsdom": "^24.0.0",
+    "jsdom": "^26.0.0",
     "resize-observer-polyfill": "^1.5.1",
-    "vitest": "^2.1.9"
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.9",
+    "vue-tsc": "^2.2.0"
   },
-  "prettier": "@vcsuite/eslint-config/prettier.js",
+  "dependencies": {
+    "@vcsuite/check": "^2.1.0",
+    "@vcsuite/logger": "^1.0.1",
+    "@vcsuite/parsers": "^2.0.1",
+    "fast-deep-equal": "^3.1.3"
+  },
   "mapVersion": "^6.1"
 }

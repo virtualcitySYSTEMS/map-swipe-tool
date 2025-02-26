@@ -2,15 +2,13 @@ import {
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
 } from '@vcmap-cesium/engine';
-import { checkMaybe } from '@vcsuite/check';
+import { check, maybe } from '@vcsuite/check';
+import type { VcsUiApp } from '@vcmap/ui';
 import { VcsEvent } from '@vcmap/core';
+import { SplitDirectionKeys, SwipeElementTitles } from './index.js';
 import { name as pluginName } from '../package.json';
 
-/**
- * @param {number} splitPosition
- * @returns {HTMLElement}
- */
-function createSwipeElement(splitPosition) {
+function createSwipeElement(splitPosition: number): HTMLElement {
   const element = document.createElement('div');
   element.className = 'vcm-swipe-element';
   element.style.position = 'absolute';
@@ -21,12 +19,10 @@ function createSwipeElement(splitPosition) {
   return element;
 }
 
-/**
- * @param {string} title
- * @param {string} direction - left or right
- * @returns {HTMLSpanElement}
- */
-function createTitleElement(title, direction) {
+function createTitleElement(
+  title: string,
+  direction: SplitDirectionKeys,
+): HTMLSpanElement {
   const element = document.createElement('span');
   element.classList.add(
     'vcm-swipe-element-title',
@@ -44,61 +40,32 @@ function createTitleElement(title, direction) {
   return element;
 }
 
-/**
- * Creates an element which sets the position on the {@link @vcmap/core.SplitScreen} when moved
- * @class
- * @api
- */
+/** Creates an element which sets the position on the {@link @vcmap/core.SplitScreen} when moved */
 class SwipeElement {
-  /**
-   * @param {import("@vcmap/ui").VcsUiApp} app
-   * @param {Object<string, string>|undefined} titles
-   */
-  constructor(app, titles) {
-    /**
-     * @type {import("@vcmap/ui").VcsUiApp}
-     * @private
-     */
-    this._app = app;
-    /**
-     * @type {HTMLElement}
-     * @api
-     */
-    this.element = createSwipeElement(this._app.maps.splitPosition);
-    /**
-      @type {import("@vcmap-cesium/engine").ScreenSpaceEventHandler}
-     */
-    this.swipeEventHandler = new ScreenSpaceEventHandler(
-      /** @type {HTMLCanvasElement} */ (this.element),
-    );
-    /**
-     * @type {boolean}
-     */
-    this.swipeActive = false;
-    /**
-     * @type {boolean}
-     */
-    this.active = false;
-    /**
-     * @type {import("@vcmap/core").VcsEvent<boolean>}
-     */
-    this.stateChanged = new VcsEvent();
-    /**
-     * @type {import("@vcmap/core").VcsEvent<number>}
-     */
-    this.positionChanged = new VcsEvent();
-    /**
-     * @type {Object<string, string>|undefined}
-     * @private
-     */
-    this._titles = titles;
-    /**
-     *
-     * @type {Array<function():void>}
-     * @private
-     */
-    this._listeners = [];
+  element: HTMLElement;
 
+  swipeEventHandler: ScreenSpaceEventHandler;
+
+  swipeActive = false;
+
+  active = false;
+
+  stateChanged: VcsEvent<boolean> = new VcsEvent();
+
+  positionChanged: VcsEvent<number> = new VcsEvent();
+
+  private _listeners: Array<() => void> = [];
+
+  private _i18nChangedListener: () => void;
+
+  constructor(
+    private _app: VcsUiApp,
+    private _titles?: SwipeElementTitles,
+  ) {
+    this.element = createSwipeElement(this._app.maps.splitPosition);
+    this.swipeEventHandler = new ScreenSpaceEventHandler(
+      this.element as HTMLCanvasElement,
+    );
     this._i18nChangedListener = this._app.i18n.changed.addEventListener(
       ({ name }) => {
         if (name === pluginName) {
@@ -108,51 +75,44 @@ class SwipeElement {
     );
   }
 
-  /**
-   * The titles on the swipe element
-   * @type {Object<string, string>|undefined}
-   */
-  get titles() {
+  /** The titles on the swipe element */
+  get titles(): SwipeElementTitles | undefined {
     return this._titles;
   }
 
-  /**
-   * @param {Object<string, string>|undefined} titles
-   */
-  set titles(titles) {
-    checkMaybe(titles, Object);
-
+  set titles(titles: SwipeElementTitles | undefined) {
+    check(titles, maybe(Object));
     this._titles = titles;
     this._setTitles();
   }
 
-  /**
-   * set the title elements
-   * @private
-   */
-  _setTitles() {
+  /** Set the title elements */
+  private _setTitles(): void {
     while (this.element.firstChild) {
-      this.element.removeChild(this.element.lastChild);
+      this.element.removeChild(this.element.firstChild);
     }
-    if (this._titles) {
-      if (this._titles.left) {
+    if (this.titles) {
+      if (this.titles.left) {
         this.element.appendChild(
-          createTitleElement(this._app.vueI18n.t(this.titles.left), 'left'),
+          createTitleElement(
+            this._app.vueI18n.t(this.titles.left),
+            SplitDirectionKeys.LEFT,
+          ),
         );
       }
-      if (this._titles.right) {
+      if (this.titles.right) {
         this.element.appendChild(
-          createTitleElement(this._app.vueI18n.t(this.titles.right), 'right'),
+          createTitleElement(
+            this._app.vueI18n.t(this.titles.right),
+            SplitDirectionKeys.RIGHT,
+          ),
         );
       }
     }
   }
 
-  /**
-   * Adds the swipeElement to the map container
-   * @api
-   */
-  activate() {
+  /** Adds the swipeElement to the map container */
+  activate(): void {
     if (!this.active) {
       this._addElementToMap();
       this._setTitles();
@@ -180,11 +140,8 @@ class SwipeElement {
     this.stateChanged.raiseEvent(this.active);
   }
 
-  /**
-   * Removes the swipeElement from the map container
-   * @api
-   */
-  deactivate() {
+  /** Removes the swipeElement from the map container */
+  deactivate(): void {
     if (this.active) {
       this._removeElementFromMap();
       this.swipeEventHandler.removeInputAction(ScreenSpaceEventType.LEFT_DOWN);
@@ -197,33 +154,30 @@ class SwipeElement {
     this.stateChanged.raiseEvent(this.active);
   }
 
-  handleMapChange() {
+  handleMapChange(): void {
     this._removeElementFromMap();
     if (this.active) {
       this._addElementToMap();
     }
   }
 
-  _addElementToMap() {
-    this._app.maps.activeMap.mapElement.appendChild(this.element);
+  private _addElementToMap(): void {
+    this._app.maps.target!.appendChild(this.element);
   }
 
-  _removeElementFromMap() {
+  private _removeElementFromMap(): void {
     if (this.element.parentElement) {
       this.element.parentElement.removeChild(this.element);
     }
   }
 
-  /**
-   * sync the swipe position of the dom element and map layers
-   * @param {Object} movement
-   */
-  onSwipingListener(movement) {
+  /** Sync the swipe position of the dom element and map layers */
+  onSwipingListener(movement: ScreenSpaceEventHandler.MotionEvent): void {
     if (this.swipeActive) {
       const relativeOffset = movement.endPosition.x;
       const splitPosition =
         (this.element.offsetLeft + relativeOffset) /
-        this.element.parentElement.offsetWidth;
+        this.element.parentElement!.offsetWidth;
       if (splitPosition > 0.01 && splitPosition < 0.99) {
         this._app.maps.splitPosition = splitPosition;
         this.element.style.left = `calc(${
@@ -234,7 +188,7 @@ class SwipeElement {
     }
   }
 
-  destroy() {
+  destroy(): void {
     this.deactivate();
     this._i18nChangedListener();
     this._listeners.forEach((cb) => cb());

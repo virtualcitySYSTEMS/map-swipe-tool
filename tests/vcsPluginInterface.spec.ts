@@ -1,22 +1,31 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { VcsUiApp, loadPlugin } from '@vcmap/ui';
-import plugin from '../../src/index.js';
-import packageJSON from '../../package.json';
+import { VcsUiApp, loadPlugin, isValidPackageName, VcsPlugin } from '@vcmap/ui';
+import plugin from '../src/index.js';
+import packageJSON from '../package.json';
 
-function sleep(ms = 0) {
+function sleep(ms = 0): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-window.VcsPluginLoaderFunction = (name, module) => ({
+type TestPluginInstance = VcsPlugin<object, object>;
+
+// @ts-expect-error: not defined on global
+window.VcsPluginLoaderFunction = (
+  name: string,
+  module: string,
+): {
+  default: () => TestPluginInstance;
+} => ({
+  // @ts-expect-error: interface may not use this
   default: () => plugin({ name }, module),
 });
 
 const testPropSymbol = Symbol('testProp');
 
 describe('VcsPlugin Interface test', () => {
-  let pluginInstance;
+  let pluginInstance: TestPluginInstance | null;
 
   beforeAll(async () => {
     pluginInstance = await loadPlugin(packageJSON.name, {
@@ -30,8 +39,9 @@ describe('VcsPlugin Interface test', () => {
   });
 
   describe('name, version, mapVersion', () => {
-    it('should return the plugin name from the package.json', () => {
+    it('should return a valid plugin name from the package.json', () => {
       expect(pluginInstance).to.have.property('name', packageJSON.name);
+      expect(isValidPackageName(pluginInstance.name)).to.be.true;
     });
     it('should return the plugin version from the package.json', () => {
       expect(pluginInstance).to.have.property('version', packageJSON.version);
@@ -55,7 +65,7 @@ describe('VcsPlugin Interface test', () => {
         expect(pluginInstance.i18n).to.be.a('object');
         const [scope, name] = packageJSON.name.split('/');
         const unscopedName = name || scope;
-        const camelCaseName = unscopedName.replace(/-./g, (x) =>
+        const camelCaseName = unscopedName.replace(/-./g, (x: string) =>
           x[1].toUpperCase(),
         );
         Object.values(pluginInstance.i18n).forEach((locale) => {
@@ -69,6 +79,14 @@ describe('VcsPlugin Interface test', () => {
     it('may implement initialize', () => {
       if (pluginInstance?.initialize) {
         expect(pluginInstance.initialize).to.be.a('function');
+        expect(pluginInstance.initialize(new VcsUiApp(), undefined)).to.not
+          .throw;
+      }
+    });
+    it('may implement onVcsAppMounted', () => {
+      if (pluginInstance?.onVcsAppMounted) {
+        expect(pluginInstance.onVcsAppMounted).to.be.a('function');
+        expect(pluginInstance.onVcsAppMounted(new VcsUiApp())).to.not.throw;
       }
     });
     it('should implement destroy', () => {
@@ -92,8 +110,10 @@ describe('VcsPlugin Interface test', () => {
   });
 
   describe('shadowing a plugin', () => {
-    let app;
-    let pluginInstance2;
+    let app: VcsUiApp;
+    let pluginInstance2:
+      | (TestPluginInstance & { [testPropSymbol]?: string })
+      | null;
 
     beforeAll(async () => {
       app = new VcsUiApp();

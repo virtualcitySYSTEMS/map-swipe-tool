@@ -5,13 +5,13 @@ import { SplitDirection } from '@vcmap-cesium/engine';
 import LayerSwipeTreeItem, {
   SplitActionState,
 } from '../../../src/swipeTree/layerSwipeTreeItem.js';
+import { SplitableLayer } from '../../../src/swipeTool.js';
 
 describe('LayerContentTreeItem', () => {
   describe('if there is a layer', () => {
-    let layer;
-    let item;
-    /** @type {VcsUiApp} */
-    let app;
+    let app: VcsUiApp;
+    let layer: SplitableLayer;
+    let item: LayerSwipeTreeItem;
 
     beforeAll(async () => {
       app = new VcsUiApp();
@@ -67,8 +67,8 @@ describe('LayerContentTreeItem', () => {
       it('should no longer listen to state changes', async () => {
         layer.splitDirection = SplitDirection.LEFT;
         await layer.activate();
-        expect(item.splitState.left.value).to.equal(SplitActionState.INACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.INACTIVE);
         layer.deactivate();
       });
     });
@@ -77,31 +77,31 @@ describe('LayerContentTreeItem', () => {
       it('should have a split state of left/right ACTIVE, if all layer is active and has SplitDirection none', async () => {
         layer.splitDirection = SplitDirection.NONE;
         await layer.activate();
-        expect(item.splitState.left.value).to.equal(SplitActionState.ACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.ACTIVE);
         layer.deactivate();
       });
 
       it('should have a split state of left ACTIVE and right INACTIVE, if layer is active and has SplitDirection left', async () => {
         layer.splitDirection = SplitDirection.LEFT;
         await layer.activate();
-        expect(item.splitState.left.value).to.equal(SplitActionState.ACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.INACTIVE);
         layer.deactivate();
       });
 
       it('should have a split state of left INACTIVE and right ACTIVE, if layer is active and has SplitDirection right', async () => {
         layer.splitDirection = SplitDirection.RIGHT;
         await layer.activate();
-        expect(item.splitState.left.value).to.equal(SplitActionState.INACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.ACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.ACTIVE);
         layer.deactivate();
       });
 
-      it('should have a split state of left/ right INACTIVE, if layer is inactive', async () => {
+      it('should have a split state of left/ right INACTIVE, if layer is inactive', () => {
         layer.deactivate();
-        expect(item.splitState.left.value).to.equal(SplitActionState.INACTIVE);
-        expect(item.splitState.right.value).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.left).to.equal(SplitActionState.INACTIVE);
+        expect(item.splitState.right).to.equal(SplitActionState.INACTIVE);
       });
     });
   });

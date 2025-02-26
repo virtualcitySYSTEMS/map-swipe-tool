@@ -1,17 +1,18 @@
 import { ToolboxType, WindowSlot } from '@vcmap/ui';
 import { ObliqueMap } from '@vcmap/core';
 import { reactive } from 'vue';
+import type { VcsAction, VcsUiApp } from '@vcmap/ui';
 import SwipeToolComponent from './SwipeToolComponent.vue';
+import type SwipeElement from './swipeElement.js';
+import type SwipeTool from './swipeTool.js';
 import { name as pluginName } from '../package.json';
 
 export const swipeWindowId = 'swipe-tool-window';
 
-/**
- *
- * @param {SwipeElement} swipeElement
- * @returns {{action: import("@vcmap/ui").VcsAction, destroy: Function}}
- */
-function createSwipeElementAction(swipeElement) {
+function createSwipeElementAction(swipeElement: SwipeElement): {
+  action: VcsAction;
+  destroy: () => void;
+} {
   const action = reactive({
     name: 'hide-swipe-action',
     title: 'swipeTool.hideController',
@@ -31,22 +32,16 @@ function createSwipeElementAction(swipeElement) {
   const listener = swipeElement.stateChanged.addEventListener((active) => {
     action.active = active;
   });
-  const destroy = () => listener();
-  return { action, destroy };
+  return { action, destroy: listener };
 }
 
-/**
- * @param {import("@vcmap/ui").VcsUiApp} app
- * @param {SwipeTool} swipeTool
- * @returns {function():void}
- */
-export function setupSwipeToolActions(app, swipeTool) {
+export function setupSwipeToolActions(
+  app: VcsUiApp,
+  swipeTool: SwipeTool,
+): () => void {
   const { action: swipeElementAction, destroy: swipeElementDestroy } =
     createSwipeElementAction(swipeTool.swipeElement);
-  /**
-   *
-   * @type {import("@vcmap/ui").WindowComponentOptions}
-   */
+
   const windowComponent = {
     id: swipeWindowId,
     component: SwipeToolComponent,
@@ -69,7 +64,7 @@ export function setupSwipeToolActions(app, swipeTool) {
     callback() {
       if (action.active) {
         if (action.background) {
-          return app.windowManager.add(windowComponent, pluginName);
+          app.windowManager.add(windowComponent, pluginName);
         } else {
           app.windowManager.remove(swipeWindowId);
           swipeTool.deactivate();
@@ -79,9 +74,8 @@ export function setupSwipeToolActions(app, swipeTool) {
       } else {
         swipeTool.activate();
         action.active = true;
-        return app.windowManager.add(windowComponent, pluginName);
+        app.windowManager.add(windowComponent, pluginName);
       }
-      return null;
     },
   });
 
@@ -138,12 +132,10 @@ export function setupSwipeToolActions(app, swipeTool) {
   };
 }
 
-/**
- * @param {import("@vcmap/ui").VcsUiApp} app
- * @param {SwipeTool} swipeTool
- * @returns {function():void}
- */
-export function setupSwipeToolActionsNoUI(app, swipeTool) {
+export function setupSwipeToolActionsNoUI(
+  app: VcsUiApp,
+  swipeTool: SwipeTool,
+): () => void {
   const action = reactive({
     name: 'swipe-action',
     title: 'swipeTool.title',
@@ -157,7 +149,6 @@ export function setupSwipeToolActionsNoUI(app, swipeTool) {
         swipeTool.activate();
         action.active = true;
       }
-      return null;
     },
   });
 

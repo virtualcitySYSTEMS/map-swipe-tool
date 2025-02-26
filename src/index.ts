@@ -1,77 +1,93 @@
-import { name, version, mapVersion } from '../package.json';
-import SwipeTool from './swipeTool.js';
-import { parseUrlPluginState, writeUrlPluginState } from './stateHelper.js';
+import type { PluginConfigEditor, VcsPlugin, VcsUiApp } from '@vcmap/ui';
+import SwipeTool, { type SwipeLayerState } from './swipeTool.js';
+import {
+  parseUrlPluginState,
+  writeUrlPluginState,
+  type SwipeToolUrlState,
+} from './stateHelper.js';
 import SwipeToolConfigEditor from './SwipeToolConfigEditor.vue';
+import { name, version, mapVersion } from '../package.json';
 
-/**
- * @typedef {Object} SwipeLayerOptions
- * @property {boolean} active
- * @property {string} [splitDirection] - either 'left' or 'right', if omitted none is applied
- */
+export enum SplitDirectionKeys {
+  LEFT = 'left',
+  RIGHT = 'right',
+}
+export type LayerStateOptions = {
+  active: boolean;
+  /** if omitted none is applied */
+  splitDirection?: SplitDirectionKeys;
+};
 
-/**
- * @typedef {Object} SwipeElementTitles
- * @property {string} left
- * @property {string} right
- */
+export type SwipeElementTitles = {
+  left: string;
+  right: string;
+};
 
-/**
- * @typedef {Object} SwipeToolConfig
- * @property {boolean} [showSwipeTree=true] - If true, show tree of swipe layers. If false, only provide toggle capabilities
- * @property {boolean} [showSwipeElement=true] - hide the swipe element
- * @property {number|undefined} [splitPosition] - the position between 0 and 1 to place the split at
- * @property {SwipeElementTitles|undefined} [swipeElementTitles] - an object with "left" and/or "right" keys representing string titles to be placed either side of the swipe element
- * @property {Object<string,SwipeLayerOptions>} [swipeLayerStates] - the layers to activate, with a given swipe direction
- * @api
- */
+export type SwipeToolConfig = {
+  /** If true, show tree of swipe layers. If false, only provide toggle capabilities */
+  showSwipeTree?: boolean;
+  /** hide the swipe element */
+  showSwipeElement?: boolean;
+  /** the position between 0 and 1 to place the split at */
+  splitPosition?: number;
+  /** an object with "left" and/or "right" keys representing string titles to be placed either side of the swipe element */
+  swipeElementTitles?: SwipeElementTitles;
+  /** the layers to activate, with a given swipe direction */
+  swipeLayerStates?: Record<string, LayerStateOptions>;
+};
 
-/**
- * @typedef {Object} SwipeToolState
- * @property {boolean?} active
- * @property {number?} splitPosition
- * @property {Object<string,SwipeLayerState>?} swipeLayerStates
- */
+export type SwipeToolState = {
+  active?: boolean;
+  splitPosition?: number;
+  swipeLayerStates?: Record<string, SwipeLayerState>;
+};
 
-/**
- * @param {SwipeToolConfig} config - the configuration of this plugin instance, passed in from the app.
- * @returns {import("@vcmap/ui/src/vcsUiApp").VcsPlugin<SwipeToolConfig, SwipeToolState>}
- */
-export default function splitView(config) {
-  /**
-   * @type {SwipeTool}
-   */
-  let swipeTool;
-  let listener;
-  let app;
+export type SwipeToolPlugin = VcsPlugin<
+  SwipeToolConfig,
+  SwipeToolState | SwipeToolUrlState
+> & {
+  swipeTool: SwipeTool;
+  active: boolean;
+  activate: () => void;
+  deactivate: () => void;
+};
 
+export default function plugin(config: SwipeToolConfig): SwipeToolPlugin {
+  let swipeTool: SwipeTool | undefined;
+  let app: VcsUiApp | undefined;
+  let listener: (() => void) | undefined;
   return {
-    get name() {
+    get name(): string {
       return name;
     },
-    get version() {
+    get version(): string {
       return version;
     },
-    get mapVersion() {
+    get mapVersion(): string {
       return mapVersion;
     },
-    get swipeTool() {
+    get swipeTool(): SwipeTool {
+      if (!swipeTool) {
+        if (!app) {
+          throw new Error('VcsUiApp not yet initialized');
+        }
+        swipeTool = new SwipeTool(app, config);
+      }
       return swipeTool;
     },
-    get active() {
-      return swipeTool?.active;
+    get active(): boolean {
+      return swipeTool?.active ?? false;
     },
-    activate() {
+    activate(): void {
       swipeTool?.activate();
     },
-    deactivate() {
+    deactivate(): void {
       swipeTool?.deactivate();
     },
-    /**
-     * @param {import("@vcmap/ui").VcsUiApp} vcsUiApp
-     * @param {SwipeToolState=} state
-     * @returns {void}
-     */
-    initialize: (vcsUiApp, state) => {
+    initialize(
+      vcsUiApp: VcsUiApp,
+      state?: SwipeToolState | SwipeToolUrlState,
+    ): Promise<void> {
       app = vcsUiApp;
       if (!swipeTool) {
         swipeTool = new SwipeTool(app, config);
@@ -88,40 +104,30 @@ export default function splitView(config) {
         // mapElement must be available to add swipeElement
         listener = app.maps.mapActivated.addEventListener(() => {
           activate();
-          listener();
-          listener = null;
+          listener?.();
+          listener = undefined;
         });
       }
+      return Promise.resolve();
     },
-    /**
-     * @returns {SwipeToolConfig}
-     */
-    toJSON() {
-      return swipeTool ? swipeTool.toJSON() : {};
-    },
-    /**
-     * @returns {SwipeToolConfig}
-     */
-    getDefaultOptions() {
+    getDefaultOptions(): SwipeToolConfig {
       return SwipeTool.getDefaultOptions();
     },
-    /**
-     * should return the plugins state
-     * @param {boolean} forUrl
-     * @returns {SwipeToolState|import("./stateHelper.js").SwipeToolUrlState}
-     */
-    getState(forUrl) {
+    toJSON(): SwipeToolConfig {
+      return swipeTool ? swipeTool.toJSON() : {};
+    },
+    getState(forUrl?: boolean): SwipeToolState | SwipeToolUrlState {
       const state = {
-        active: swipeTool.active,
-        splitPosition: swipeTool.splitPosition,
-        swipeLayerStates: swipeTool.getState(),
+        active: swipeTool?.active,
+        splitPosition: swipeTool?.splitPosition,
+        swipeLayerStates: swipeTool?.getState(),
       };
       if (forUrl) {
-        return swipeTool.active ? writeUrlPluginState(state) : {};
+        return swipeTool?.active ? writeUrlPluginState(state) : {};
       }
       return state;
     },
-    getConfigEditors() {
+    getConfigEditors(): PluginConfigEditor<object>[] {
       return [
         {
           component: SwipeToolConfigEditor,
@@ -214,14 +220,14 @@ export default function splitView(config) {
         },
       },
     },
-    destroy: () => {
+    destroy(): void {
       if (swipeTool) {
         swipeTool.destroy();
-        swipeTool = null;
+        swipeTool = undefined;
       }
       if (listener) {
         listener();
-        listener = null;
+        listener = undefined;
       }
     },
   };

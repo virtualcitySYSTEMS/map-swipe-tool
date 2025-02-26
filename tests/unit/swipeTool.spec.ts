@@ -1,11 +1,23 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { LayerContentTreeItem, VcsUiApp } from '@vcmap/ui';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  vi,
+  MockInstance,
+} from 'vitest';
+import { ContentTreeItem, LayerContentTreeItem, VcsUiApp } from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import { OpenlayersMap, VectorLayer } from '@vcmap/core';
 import { sleep } from '../helpers.js';
-import SwipeTool, { parseSwipeLayerState } from '../../src/swipeTool.js';
+import SwipeTool, {
+  parseSwipeLayerState,
+  SplitableLayer,
+} from '../../src/swipeTool.js';
+import { SplitDirectionKeys } from '../../src/index.js';
 
-async function setupMap() {
+async function setupMap(): Promise<VcsUiApp> {
   const app = new VcsUiApp();
   const map = new OpenlayersMap({});
   app.maps.add(map);
@@ -24,7 +36,7 @@ const options = {
   swipeLayerStates: {
     sampleLayer: {
       active: true,
-      splitDirection: 'left',
+      splitDirection: SplitDirectionKeys.LEFT,
     },
   },
   swipeElementTitles: {
@@ -47,8 +59,8 @@ describe('SwipeTool', () => {
   });
 
   describe('parsing options', () => {
-    let app;
-    let swipeTool;
+    let app: VcsUiApp;
+    let swipeTool: SwipeTool;
 
     beforeAll(() => {
       app = new VcsUiApp();
@@ -87,10 +99,10 @@ describe('SwipeTool', () => {
   });
 
   describe('swipe state', () => {
-    let app;
-    let layer;
-    let item;
-    let swipeTool;
+    let app: VcsUiApp;
+    let layer: SplitableLayer;
+    let item: ContentTreeItem;
+    let swipeTool: SwipeTool;
 
     beforeAll(async () => {
       app = await setupMap();
@@ -153,10 +165,10 @@ describe('SwipeTool', () => {
   });
 
   describe('activating swipe tool', () => {
-    let app;
-    let layer;
-    let swipeTool;
-    let setTreeViewSpy;
+    let app: VcsUiApp;
+    let layer: SplitableLayer;
+    let swipeTool: SwipeTool;
+    let setTreeViewSpy: MockInstance;
 
     beforeAll(async () => {
       app = await setupMap();
@@ -188,10 +200,10 @@ describe('SwipeTool', () => {
   });
 
   describe('deactivating swipe tool', () => {
-    let app;
-    let layer;
-    let swipeTool;
-    let setStateSpy;
+    let app: VcsUiApp;
+    let layer: SplitableLayer;
+    let swipeTool: SwipeTool;
+    let setStateSpy: MockInstance;
 
     beforeAll(async () => {
       app = await setupMap();
