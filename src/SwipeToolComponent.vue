@@ -40,7 +40,7 @@
 <script lang="ts">
   import { computed, defineComponent, inject, ref } from 'vue';
   import { VIcon } from 'vuetify/components';
-  import { openStateMapSymbol, VcsFormSection, VcsTreeview } from '@vcmap/ui';
+  import { VcsFormSection, VcsTreeview } from '@vcmap/ui';
   import type { VcsUiApp } from '@vcmap/ui';
   import type { SwipeToolPlugin } from './index.js';
   import { name } from '../package.json';
@@ -60,21 +60,10 @@
       const app = inject('vcsApp') as VcsUiApp;
       const plugin = app.plugins.getByKey(name) as SwipeToolPlugin;
       const { subTreeIds } = plugin.swipeTool;
-      const opened = ref();
 
-      // @ts-expect-error - the openStateMapSymbol is not exposed
-      const openStateMap = app.contentTree[openStateMapSymbol] as Map<
-        string,
-        string[]
-      >;
-      if (openStateMap && openStateMap.has(app.maps.activeMap!.name)) {
-        opened.value = openStateMap.get(app.maps.activeMap!.name);
-      } else {
-        opened.value = subTreeIds.value.flatMap((id) =>
-          app.contentTree.getTreeOpenState(id),
-        );
-      }
-
+      const opened = ref(
+        subTreeIds.value.flatMap((id) => app.contentTree.getTreeOpenState(id)),
+      );
       const trees = computed(() => {
         return subTreeIds.value.flatMap(
           (id) => plugin.swipeTool.getComputedVisibleTree(id).value,
