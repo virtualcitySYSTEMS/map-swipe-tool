@@ -97,20 +97,24 @@ class LayerGroupSwipeTreeItem extends SwipeTreeItem {
           return false;
         })
         .forEach((layer) => {
-          toggle(this._app.maps.layerCollection, layer, dir).catch((e) => {
-            getLogger(name).error(
-              'Error while applying Split Direction to layer',
-              layer.name,
-              e,
-            );
-          });
+          toggle(this._app.maps.layerCollection, layer, dir).catch(
+            (e: unknown) => {
+              getLogger(name).error(
+                'Error while applying Split Direction to layer',
+                layer.name,
+                e,
+              );
+            },
+          );
         });
     };
     const { actions, destroy } = createSplitStateRefActions(
       this.splitState,
       cb,
     );
-    actions.forEach((a) => this.addAction(a));
+    actions.forEach((a) => {
+      this.addAction(a);
+    });
 
     this._destroyWatcher = destroy;
   }

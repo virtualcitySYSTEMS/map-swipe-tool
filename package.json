@@ -1,6 +1,6 @@
 {
   "name": "@vcmap/swipe-tool",
-  "version": "3.0.1",
+  "version": "4.0.0-rc.0",
   "description": "A VC Map plugin to swipe split views.",
   "type": "module",
   "main": "dist/index.js",
@@ -45,26 +45,28 @@
   ],
   "prettier": "@vcsuite/eslint-config/prettier.js",
   "peerDependencies": {
-    "@vcmap-cesium/engine": "^11.0.2",
-    "@vcmap/core": "^6.1.1",
-    "@vcmap/ui": "^6.1.0",
+    "@vcmap-cesium/engine": "^11.0.3",
+    "@vcmap/core": "^6.2.0-rc.1",
+    "@vcmap/ui": "^6.2.0-rc.2",
     "ol": "^10.4.0",
     "vue": "~3.4.38",
-    "vuetify": "^3.7.15"
+    "vuetify": "~3.7.14"
   },
   "overrides": {
-    "esbuild": "0.25.0"
+    "esbuild": "0.25.0",
+    "@vcmap/core": "^6.2.0-rc.1",
+    "@vcmap/ui": "^6.2.0-rc.2"
   },
   "devDependencies": {
-    "@vcmap/plugin-cli": "^4.0.2",
-    "@vcsuite/eslint-config": "^3.0.8",
+    "@vcmap/plugin-cli": "^4.1.2",
+    "@vcsuite/eslint-config": "^4.0.0",
     "@vitest/coverage-v8": "^2.1.9",
     "jest-canvas-mock": "^2.5.2",
     "jsdom": "^26.0.0",
     "resize-observer-polyfill": "^1.5.1",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "vitest": "^2.1.9",
-    "vue-tsc": "^2.2.8"
+    "vue-tsc": "^2.2.12"
   },
   "dependencies": {
     "@vcsuite/check": "^2.1.0",
@@ -72,5 +74,5 @@
     "@vcsuite/parsers": "^2.0.1",
     "fast-deep-equal": "^3.1.3"
   },
-  "mapVersion": "^6.1"
+  "mapVersion": "^6.2"
 }

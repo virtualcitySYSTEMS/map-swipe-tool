@@ -2,7 +2,7 @@
   <div>
     <div v-if="trees.length > 0">
       <VcsFormSection v-for="(tree, idx) in trees" :key="subTreeIds[idx]">
-        <template #header v-if="tree">
+        <template v-if="tree" #header>
           <article class="pa-2 vcm-tree-header">
             <div
               class="form-section-header d-flex align-center swipe-tree-header"
@@ -23,8 +23,8 @@
         </template>
         <template #default>
           <VcsTreeview
-            :items="tree.visibleChildren"
             v-model:opened="opened"
+            :items="tree.visibleChildren"
             item-children="visibleChildren"
             open-on-click
           />

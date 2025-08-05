@@ -5,7 +5,7 @@ import {
 import { check, maybe } from '@vcsuite/check';
 import type { VcsUiApp } from '@vcmap/ui';
 import { VcsEvent } from '@vcmap/core';
-import { SplitDirectionKeys, SwipeElementTitles } from './index.js';
+import type { SplitDirectionKeys, SwipeElementTitles } from './index.js';
 import { name as pluginName } from '../package.json';
 
 function createSwipeElement(splitPosition: number): HTMLElement {
@@ -50,9 +50,9 @@ class SwipeElement {
 
   active = false;
 
-  stateChanged: VcsEvent<boolean> = new VcsEvent();
+  stateChanged = new VcsEvent<boolean>();
 
-  positionChanged: VcsEvent<number> = new VcsEvent();
+  positionChanged = new VcsEvent<number>();
 
   private _listeners: Array<() => void> = [];
 
@@ -94,18 +94,12 @@ class SwipeElement {
     if (this.titles) {
       if (this.titles.left) {
         this.element.appendChild(
-          createTitleElement(
-            this._app.vueI18n.t(this.titles.left),
-            SplitDirectionKeys.LEFT,
-          ),
+          createTitleElement(this._app.vueI18n.t(this.titles.left), 'left'),
         );
       }
       if (this.titles.right) {
         this.element.appendChild(
-          createTitleElement(
-            this._app.vueI18n.t(this.titles.right),
-            SplitDirectionKeys.RIGHT,
-          ),
+          createTitleElement(this._app.vueI18n.t(this.titles.right), 'right'),
         );
       }
     }
@@ -148,7 +142,9 @@ class SwipeElement {
       this.swipeEventHandler.removeInputAction(ScreenSpaceEventType.LEFT_UP);
       this.swipeEventHandler.removeInputAction(ScreenSpaceEventType.MOUSE_MOVE);
       this.active = false;
-      this._listeners.forEach((cb) => cb());
+      this._listeners.forEach((cb) => {
+        cb();
+      });
       this._listeners.splice(0);
     }
     this.stateChanged.raiseEvent(this.active);
@@ -191,7 +187,9 @@ class SwipeElement {
   destroy(): void {
     this.deactivate();
     this._i18nChangedListener();
-    this._listeners.forEach((cb) => cb());
+    this._listeners.forEach((cb) => {
+      cb();
+    });
     this._listeners.splice(0);
   }
 }

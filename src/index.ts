@@ -8,10 +8,7 @@ import {
 import SwipeToolConfigEditor from './SwipeToolConfigEditor.vue';
 import { name, version, mapVersion } from '../package.json';
 
-export enum SplitDirectionKeys {
-  LEFT = 'left',
-  RIGHT = 'right',
-}
+export type SplitDirectionKeys = 'left' | 'right';
 export type LayerStateOptions = {
   active: boolean;
   /** if omitted none is applied */

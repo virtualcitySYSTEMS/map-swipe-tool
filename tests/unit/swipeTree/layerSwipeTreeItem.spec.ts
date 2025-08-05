@@ -5,7 +5,7 @@ import { SplitDirection } from '@vcmap-cesium/engine';
 import LayerSwipeTreeItem, {
   SplitActionState,
 } from '../../../src/swipeTree/layerSwipeTreeItem.js';
-import { SplitableLayer } from '../../../src/swipeTool.js';
+import type { SplitableLayer } from '../../../src/swipeTool.js';
 
 describe('LayerContentTreeItem', () => {
   describe('if there is a layer', () => {

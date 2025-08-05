@@ -1,5 +1,5 @@
 import { ToolboxType, WindowSlot } from '@vcmap/ui';
-import { ObliqueMap } from '@vcmap/core';
+import { CesiumMap, OpenlayersMap } from '@vcmap/core';
 import { reactive } from 'vue';
 import type { VcsAction, VcsUiApp } from '@vcmap/ui';
 import SwipeToolComponent from './SwipeToolComponent.vue';
@@ -96,12 +96,12 @@ export function setupSwipeToolActions(
       action.background = !app.windowManager.has(swipeWindowId);
     }),
     app.maps.mapActivated.addEventListener((map) => {
-      if (map instanceof ObliqueMap) {
+      if (map instanceof CesiumMap || map instanceof OpenlayersMap) {
+        action.disabled = false;
+      } else {
         swipeTool.deactivate();
         app.windowManager.remove(swipeWindowId);
         action.disabled = true;
-      } else {
-        action.disabled = false;
       }
     }),
   ];
@@ -128,7 +128,9 @@ export function setupSwipeToolActions(
     if (swipeElementDestroy) {
       swipeElementDestroy();
     }
-    listeners.forEach((cb) => cb());
+    listeners.forEach((cb) => {
+      cb();
+    });
   };
 }
 

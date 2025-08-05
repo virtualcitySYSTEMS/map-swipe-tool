@@ -1,6 +1,6 @@
 import deepEqual from 'fast-deep-equal';
 import { parseBoolean, parseNumber } from '@vcsuite/parsers';
-import { check, maybe, ofEnum } from '@vcsuite/check';
+import { check, maybe, oneOf } from '@vcsuite/check';
 import {
   GroupContentTreeItem,
   LayerContentTreeItem,
@@ -16,7 +16,7 @@ import type {
   TreeViewItem,
   VcsUiApp,
 } from '@vcmap/ui';
-import { computed, ComputedRef, ref, type Ref } from 'vue';
+import { type ComputedRef, computed, ref, type Ref } from 'vue';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import {
   type Layer,
@@ -36,12 +36,11 @@ import {
 import GroupSwipeTreeItem from './swipeTree/groupSwipeTreeItem.js';
 import LayerGroupSwipeTreeItem from './swipeTree/layerGroupSwipeTreeItem.js';
 import {
-  SplitDirectionKeys,
   type SwipeElementTitles,
   type LayerStateOptions,
   type SwipeToolConfig,
 } from './index.js';
-import { SwipeTreeViewItem } from './swipeTree/swipeTreeItem.js';
+import type { SwipeTreeViewItem } from './swipeTree/swipeTreeItem.js';
 
 export type SplitableLayer = Layer & SplitLayer;
 
@@ -53,7 +52,7 @@ export function parseSwipeLayerState(
   options: LayerStateOptions,
 ): SwipeLayerState {
   check(options.active, Boolean);
-  check(options.splitDirection, maybe(ofEnum(SplitDirectionKeys)));
+  check(options.splitDirection, maybe(oneOf('left', 'right')));
   const key = options.splitDirection?.toUpperCase();
 
   return {
@@ -76,7 +75,7 @@ export type SwipeLayerState = {
  * swipe the split position. Changing the splitDirection property while the widget is active is tracked. Once
  * the widget is deactivated, the layer state previous its activation is reimplemented.
  */
-export class SwipeTool {
+export default class SwipeTool {
   static get className(): string {
     return 'SwipeTool';
   }
@@ -103,9 +102,9 @@ export class SwipeTool {
 
   private _subTreeIds: Ref<string[]> = ref([]);
 
-  private _subTreeViewItems: Map<string, SwipeTreeViewItem> = new Map();
+  private _subTreeViewItems = new Map<string, SwipeTreeViewItem>();
 
-  stateChanged: VcsEvent<boolean> = new VcsEvent();
+  stateChanged = new VcsEvent<boolean>();
 
   private _listeners: Array<() => void>;
 
@@ -284,7 +283,9 @@ export class SwipeTool {
     const actionsToRemove = mappedItem.actions
       .map((a) => a.name)
       .filter((name) => name !== 'split-right' && name !== 'split-left');
-    actionsToRemove.forEach((name) => mappedItem.removeAction(name));
+    actionsToRemove.forEach((name) => {
+      mappedItem.removeAction(name);
+    });
     return mappedItem.getTreeViewItem() as SwipeTreeViewItem;
   }
 
@@ -509,12 +510,12 @@ export class SwipeTool {
     this.deactivate();
     this.clear();
     this.stateChanged.destroy();
-    this._listeners.forEach((cb) => cb());
+    this._listeners.forEach((cb) => {
+      cb();
+    });
     if (this._destroyActions) {
       this._destroyActions();
     }
     this._swipeElement.destroy();
   }
 }
-
-export default SwipeTool;

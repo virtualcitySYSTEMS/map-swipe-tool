@@ -1,10 +1,10 @@
 <template>
   <AbstractConfigEditor @submit="apply">
     <VcsFormSection
+      v-if="localConfig"
       heading="swipeTool.editor.general"
       expandable
       :start-open="true"
-      v-if="localConfig"
     >
       <v-container class="py-0 px-1">
         <v-row no-gutters>
@@ -16,9 +16,9 @@
           <v-col>
             <VcsCheckbox
               id="showSwipeTree"
+              v-model="localConfig.showSwipeTree"
               :true-value="true"
               :false-value="false"
-              v-model="localConfig.showSwipeTree"
             />
           </v-col>
         </v-row>
@@ -31,9 +31,9 @@
           <v-col>
             <VcsCheckbox
               id="showSwipeElement"
+              v-model="localConfig.showSwipeElement"
               :true-value="true"
               :false-value="false"
-              v-model="localConfig.showSwipeElement"
             />
           </v-col>
         </v-row>
@@ -46,11 +46,11 @@
           <v-col>
             <VcsTextField
               id="splitPosition"
+              v-model.number="localConfig.splitPosition"
               type="number"
               step="0.1"
               min="0.0"
               max="1.0"
-              v-model.number="localConfig.splitPosition"
               :rules="[
                 (v: number) =>
                   (v >= 0 && v <= 1) || 'swipeTool.editor.splitPositionInvalid',
@@ -74,16 +74,16 @@
         <v-row v-if="enableSwipeElementTitle" no-gutters>
           <v-col>
             <VcsTextField
+              v-model.trim="swipeElementTitles.left"
               clearable
               :prefix="$t('swipeTool.swipeElementTitles.left')"
-              v-model.trim="swipeElementTitles.left"
             />
           </v-col>
           <v-col>
             <VcsTextField
+              v-model.trim="swipeElementTitles.right"
               clearable
               :prefix="$t('swipeTool.swipeElementTitles.right')"
-              v-model.trim="swipeElementTitles.right"
             />
           </v-col>
         </v-row>
@@ -99,15 +99,15 @@
           <v-col>
             <VcsSelect
               id="name"
+              v-model="swipeLayerName"
               :placeholder="$t('swipeTool.editor.swipeLayer.name')"
               :items="splitLayers"
               :item-text="(item: LayerItem) => item.title"
               :item-value="(item: LayerItem) => item.name"
-              v-model="swipeLayerName"
             />
           </v-col>
           <v-col>
-            <VcsFormButton @click="addSwipeLayer" :disabled="!swipeLayerName">{{
+            <VcsFormButton :disabled="!swipeLayerName" @click="addSwipeLayer">{{
               $t('swipeTool.editor.swipeLayer.add')
             }}</VcsFormButton>
           </v-col>
@@ -133,21 +133,17 @@
     type VcsListItem,
   } from '@vcmap/ui';
   import {
+    type Ref,
     computed,
     defineComponent,
     inject,
     reactive,
-    Ref,
     ref,
     type PropType,
   } from 'vue';
   import { moduleIdSymbol, volatileModuleId } from '@vcmap/core';
   import SwipeTool from './swipeTool.js';
-  import {
-    SplitDirectionKeys,
-    LayerStateOptions,
-    SwipeToolConfig,
-  } from './index.js';
+  import type { LayerStateOptions, SwipeToolConfig } from './index.js';
 
   function getState(state: {
     left: boolean;
@@ -156,9 +152,9 @@
     if (state.left && state.right) {
       return { active: true };
     } else if (state.left) {
-      return { active: true, splitDirection: SplitDirectionKeys.LEFT };
+      return { active: true, splitDirection: 'left' };
     } else if (state.right) {
-      return { active: true, splitDirection: SplitDirectionKeys.RIGHT };
+      return { active: true, splitDirection: 'right' };
     }
     return { active: false };
   }
@@ -187,10 +183,10 @@
     const state = {
       left:
         swipeLayerStates[name].active &&
-        swipeLayerStates[name].splitDirection === SplitDirectionKeys.LEFT,
+        swipeLayerStates[name].splitDirection === 'left',
       right:
         swipeLayerStates[name].active &&
-        swipeLayerStates[name].splitDirection === SplitDirectionKeys.RIGHT,
+        swipeLayerStates[name].splitDirection === 'right',
     };
     return {
       name,

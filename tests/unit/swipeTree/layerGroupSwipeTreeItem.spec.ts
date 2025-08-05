@@ -8,12 +8,13 @@ import {
   afterEach,
 } from 'vitest';
 import { ObliqueMap, OpenlayersMap, VectorLayer } from '@vcmap/core';
-import { LayerGroupContentTreeItemOptions, VcsUiApp } from '@vcmap/ui';
+import type { LayerGroupContentTreeItemOptions } from '@vcmap/ui';
+import { VcsUiApp } from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import LayerGroupSwipeTreeItem from '../../../src/swipeTree/layerGroupSwipeTreeItem.js';
 import { SplitActionState } from '../../../src/swipeTree/layerSwipeTreeItem.js';
-import SwipeTreeItem from '../../../src/swipeTree/swipeTreeItem.js';
-import { SplitableLayer } from '../../../src/swipeTool.js';
+import type SwipeTreeItem from '../../../src/swipeTree/swipeTreeItem.js';
+import type { SplitableLayer } from '../../../src/swipeTool.js';
 
 describe('LayerGroupContentTreeItem', () => {
   describe('if no layers are present', () => {
@@ -113,13 +114,11 @@ describe('LayerGroupContentTreeItem', () => {
         expect(item.splitState.right).to.equal(SplitActionState.ACTIVE);
       });
 
-      it('should have a split state of left/ right INACTIVE, if all layers are inactive', async () => {
-        await Promise.all(
-          layers.map((l) => {
-            l.splitDirection = SplitDirection.NONE;
-            return l.deactivate();
-          }),
-        );
+      it('should have a split state of left/ right INACTIVE, if all layers are inactive', () => {
+        layers.forEach((l) => {
+          l.splitDirection = SplitDirection.NONE;
+          l.deactivate();
+        });
         expect(item.splitState.left).to.equal(SplitActionState.INACTIVE);
         expect(item.splitState.right).to.equal(SplitActionState.INACTIVE);
       });

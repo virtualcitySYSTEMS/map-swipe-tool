@@ -11,7 +11,7 @@ import { check, ofEnum } from '@vcsuite/check';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import type { Layer, LayerCollection } from '@vcmap/core';
 import type { SplitableLayer } from '../swipeTool.js';
-import { SwipeTreeViewItem } from './swipeTreeItem.js';
+import type { SwipeTreeViewItem } from './swipeTreeItem.js';
 
 export enum SplitActionState {
   /** hidden on this side */
@@ -168,7 +168,7 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem<LayerContentTreeItemPr
     return 'LayerSwipeTreeItem';
   }
 
-  _app: VcsUiApp;
+  protected _app: VcsUiApp;
 
   private _splitState = reactive<SplitActionStateObject>({
     left: SplitActionState.ACTIVE,
@@ -220,7 +220,9 @@ class LayerSwipeTreeItem extends VcsObjectContentTreeItem<LayerContentTreeItemPr
       this.splitState,
       cb,
     );
-    actions.forEach((a) => this.addAction(a));
+    actions.forEach((a) => {
+      this.addAction(a);
+    });
     this._destroyWatcher = destroy;
   }
 

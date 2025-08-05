@@ -1,21 +1,13 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  vi,
-  MockInstance,
-} from 'vitest';
-import { ContentTreeItem, LayerContentTreeItem, VcsUiApp } from '@vcmap/ui';
+import type { MockInstance } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import type { ContentTreeItem } from '@vcmap/ui';
+import { LayerContentTreeItem, VcsUiApp } from '@vcmap/ui';
 import { SplitDirection } from '@vcmap-cesium/engine';
 import { OpenlayersMap, VectorLayer } from '@vcmap/core';
 import { sleep } from '../helpers.js';
-import SwipeTool, {
-  parseSwipeLayerState,
-  SplitableLayer,
-} from '../../src/swipeTool.js';
-import { SplitDirectionKeys } from '../../src/index.js';
+import type { SplitableLayer } from '../../src/swipeTool.js';
+import SwipeTool, { parseSwipeLayerState } from '../../src/swipeTool.js';
+import { type SwipeToolConfig } from '../../src/index.js';
 
 async function setupMap(): Promise<VcsUiApp> {
   const app = new VcsUiApp();
@@ -29,14 +21,14 @@ async function setupMap(): Promise<VcsUiApp> {
   return app;
 }
 
-const options = {
+const options: SwipeToolConfig = {
   showSwipeTree: true,
   showSwipeElement: true,
   splitPosition: 0.1,
   swipeLayerStates: {
     sampleLayer: {
       active: true,
-      splitDirection: SplitDirectionKeys.LEFT,
+      splitDirection: 'left',
     },
   },
   swipeElementTitles: {
@@ -48,7 +40,7 @@ const options = {
 describe('SwipeTool', () => {
   describe('parsing swipe layer state', () => {
     it('should return SwipeLayerState', () => {
-      const { sampleLayer } = options.swipeLayerStates;
+      const { sampleLayer } = options.swipeLayerStates!;
       const swipeLayerState = parseSwipeLayerState(sampleLayer);
       expect(swipeLayerState).to.have.property('active', sampleLayer.active);
       expect(swipeLayerState).to.have.property(
@@ -78,18 +70,21 @@ describe('SwipeTool', () => {
         options.showSwipeTree,
       );
     });
+
     it('should set showSwipeElement', () => {
       expect(swipeTool).to.have.property(
         'showSwipeElement',
         options.showSwipeElement,
       );
     });
+
     it('should set splitPosition', () => {
       expect(swipeTool).to.have.property(
         'splitPosition',
         options.splitPosition,
       );
     });
+
     it('should set swipeElementTitles', () => {
       expect(swipeTool).to.have.property(
         'swipeElementTitles',
@@ -188,12 +183,15 @@ describe('SwipeTool', () => {
     it('should update the maps splitPosition', () => {
       expect(app.maps.splitPosition).to.eq(swipeTool.splitPosition);
     });
+
     it('should activate the swipe element', () => {
       expect(swipeTool.swipeElement).to.have.property('active', true);
     });
+
     it('should set the tree view', () => {
       expect(setTreeViewSpy).toHaveBeenCalledTimes(1);
     });
+
     it('should set the swipe tool state', () => {
       expect(swipeTool).to.have.property('active', true);
     });
@@ -224,12 +222,15 @@ describe('SwipeTool', () => {
     it('should update the splitPosition', () => {
       expect(swipeTool.splitPosition).to.eq(app.maps.splitPosition);
     });
+
     it('should deactivate the swipe element', () => {
       expect(swipeTool.swipeElement).to.have.property('active', false);
     });
+
     it('should set the swipe state to the initial state', () => {
       expect(setStateSpy).toHaveBeenCalledTimes(1);
     });
+
     it('should set the swipe tool state', () => {
       expect(swipeTool).to.have.property('active', false);
     });

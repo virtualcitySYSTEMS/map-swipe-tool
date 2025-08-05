@@ -73,7 +73,9 @@ class GroupSwipeTreeItem extends SwipeTreeItem {
       this.splitState,
       cb,
     );
-    actions.forEach((a) => this.addAction(a));
+    actions.forEach((a) => {
+      this.addAction(a);
+    });
     this._destroyWatcher = destroy;
   }
 
