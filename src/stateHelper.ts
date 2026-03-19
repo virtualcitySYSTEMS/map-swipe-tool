@@ -1,4 +1,4 @@
-import type { SplitDirection } from '@vcmap-cesium/engine';
+import { SplitDirection } from '@vcmap-cesium/engine';
 import type { SwipeToolState } from './index.js';
 import type { SwipeLayerState } from './swipeTool.js';
 
@@ -23,7 +23,9 @@ export function writeUrlPluginState(state: SwipeToolState): SwipeToolUrlState {
           acc: Record<string, SwipeLayerUrlState>,
           [key, { active, splitDirection }],
         ) => {
-          acc[key] = { a: active, sd: splitDirection };
+          if (splitDirection !== SplitDirection.NONE) {
+            acc[key] = { a: active, sd: splitDirection };
+          }
           return acc;
         },
         {},

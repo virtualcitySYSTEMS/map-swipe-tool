@@ -1,3 +1,7 @@
+# v4.0.1
+
+- Fixes a bug where plugin's state would include layer with SplitDirection set to none
+
 # v3.0.0
 
 - Convert SwipeTool plugin to TypeScript
