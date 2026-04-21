@@ -40,6 +40,7 @@ The `SwipeToolConfig` contains the following options:
 | splitPosition      | number                                        | 0.5       | Default Position of the Swipe Element. A number between 0 and 1, where 0.5 corresponds to center position. |
 | swipeElementTitles | Object<string,string>&vert;undefined          | undefined | An object with keys 'left' and 'right' containing titles.                                                  |
 | swipeLayerStates   | Object<string,LayerSwipeState&vert;undefined> | undefined | An object with layer name as key and state of SplitLayers as value.                                        |
+| activeOnStartup    | boolean                                       | false     | Whether the swipe tool is activated automatically on startup when no saved state is present.               |
 
 A `LayerSwipeState` can be defined. This state is applied on first activation of the tool.
 If no values are provided or after deactivation and reactivation the current state of the layers are used.

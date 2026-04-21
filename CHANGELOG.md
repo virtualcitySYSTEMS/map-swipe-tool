@@ -1,6 +1,7 @@
 # v4.1.0
 
 - Adds `ActivateSwipeToolCallback` and `DeactivateSwipeToolCallback` to activate and deactivate the swipe tool via the VcsCallback system
+- Adds `activeOnStartup` config option to activate the swipe tool automatically on startup when no saved state is present
 
 # v4.0.1
 

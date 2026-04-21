@@ -1,5 +1,6 @@
 {
   "name": "@vcmap/swipe-tool",
+  "activeOnStartup": true,
   "showSwipeTree": true,
   "showSwipeElement": true,
   "swipeLayerStates": {

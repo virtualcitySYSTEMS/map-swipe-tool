@@ -34,6 +34,8 @@ export type SwipeToolConfig = {
   swipeElementTitles?: SwipeElementTitles;
   /** the layers to activate, with a given swipe direction */
   swipeLayerStates?: Record<string, LayerStateOptions>;
+  /** if true, the swipe tool is activated on startup when no saved state is present */
+  activeOnStartup?: boolean;
 };
 
 export type SwipeToolState = {
@@ -109,7 +111,7 @@ export default function plugin(config: SwipeToolConfig): SwipeToolPlugin {
       if (pluginState?.swipeLayerStates) {
         swipeTool.setState(pluginState.swipeLayerStates);
       }
-      if (pluginState?.active) {
+      if (pluginState?.active ?? swipeTool.activeOnStartup) {
         const activate = swipeTool.activate.bind(swipeTool);
         // mapElement must be available to add swipeElement
         listener = app.maps.mapActivated.addEventListener(() => {

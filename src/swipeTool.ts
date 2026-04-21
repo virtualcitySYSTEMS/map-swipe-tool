@@ -90,6 +90,8 @@ export default class SwipeTool {
 
   private _showSwipeElement: boolean;
 
+  activeOnStartup: boolean;
+
   private _swipeElementTitles?: SwipeElementTitles;
 
   private _swipeElement: SwipeElement;
@@ -120,6 +122,7 @@ export default class SwipeTool {
       splitPosition: 0.5,
       swipeElementTitles: undefined,
       swipeLayerStates: undefined,
+      activeOnStartup: false,
     };
   }
 
@@ -139,6 +142,10 @@ export default class SwipeTool {
     this._showSwipeElement = parseBoolean(
       options.showSwipeElement,
       defaultOptions.showSwipeElement,
+    );
+    this.activeOnStartup = parseBoolean(
+      options.activeOnStartup,
+      defaultOptions.activeOnStartup,
     );
     this._swipeElementTitles =
       options.swipeElementTitles || defaultOptions.swipeElementTitles;
@@ -488,6 +495,9 @@ export default class SwipeTool {
     }
     if (!deepEqual(this.swipeLayerStates, defaultOptions.swipeLayerStates)) {
       config.swipeLayerStates = this.swipeLayerStates;
+    }
+    if (this.activeOnStartup !== defaultOptions.activeOnStartup) {
+      config.activeOnStartup = this.activeOnStartup;
     }
 
     return config;
