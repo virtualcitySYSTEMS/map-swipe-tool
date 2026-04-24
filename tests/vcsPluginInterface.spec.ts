@@ -10,7 +10,7 @@ function sleep(ms = 0): Promise<void> {
   });
 }
 
-type TestPluginInstance = VcsPlugin<object, object>;
+type TestPluginInstance = VcsPlugin<Record<never, never>, Record<never, never>>;
 
 // @ts-expect-error: not defined on global
 window.VcsPluginLoaderFunction = (
@@ -27,12 +27,15 @@ const testPropSymbol = Symbol('testProp');
 
 describe('VcsPlugin Interface test', () => {
   let pluginInstance: TestPluginInstance | null;
+  let app: VcsUiApp;
 
   beforeAll(async () => {
+    app = new VcsUiApp();
     pluginInstance = await loadPlugin(packageJSON.name, {
       name: packageJSON.name,
       entry: '_dev',
     });
+    app.plugins.add(pluginInstance!);
   });
 
   afterAll(() => {
@@ -110,7 +113,6 @@ describe('VcsPlugin Interface test', () => {
   });
 
   describe('shadowing a plugin', () => {
-    let app: VcsUiApp;
     let pluginInstance2:
       | (TestPluginInstance & { [testPropSymbol]?: string })
       | null;

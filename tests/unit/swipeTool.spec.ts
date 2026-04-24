@@ -201,15 +201,15 @@ describe('SwipeTool', () => {
     let app: VcsUiApp;
     let layer: SplitableLayer;
     let swipeTool: SwipeTool;
-    let setStateSpy: MockInstance;
+    let applyStateSpy: MockInstance;
 
     beforeAll(async () => {
       app = await setupMap();
       layer = new VectorLayer({ name: 'sampleLayer' });
       app.layers.add(layer);
       swipeTool = new SwipeTool(app, options);
-      setStateSpy = vi.spyOn(swipeTool, 'setState');
       swipeTool.activate();
+      applyStateSpy = vi.spyOn(swipeTool, 'applyState');
       swipeTool.deactivate();
     });
 
@@ -228,7 +228,7 @@ describe('SwipeTool', () => {
     });
 
     it('should set the swipe state to the initial state', () => {
-      expect(setStateSpy).toHaveBeenCalledTimes(1);
+      expect(applyStateSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should set the swipe tool state', () => {

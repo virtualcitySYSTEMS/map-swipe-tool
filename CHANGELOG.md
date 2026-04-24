@@ -1,3 +1,7 @@
+# v4.1.0
+
+- Adds `ActivateSwipeToolCallback` and `DeactivateSwipeToolCallback` to activate and deactivate the swipe tool via the VcsCallback system
+
 # v4.0.1
 
 - Fixes a bug where plugin's state would include layer with SplitDirection set to none

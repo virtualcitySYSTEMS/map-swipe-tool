@@ -159,3 +159,57 @@ swipeTool.clear();
 
 Clearing the swipe tool removes all items from the tree view, if present, and resets the initial swipe state on all swipe layers.
 It also clears cached states of `_cachedState` and `_initialState`.
+
+## Callbacks
+
+The swipe tool registers two [VcsCallbacks](https://github.com/virtualcitySYSTEMS/map-ui/blob/main/documentation/CALLBACKS.md) that can be used in guided tours, splash screens, or any other callback-driven feature.
+
+### ActivateSwipeToolCallback
+
+Activates the swipe tool and optionally applies a split position and layer states before activation.
+Accepts either `SwipeToolState` format or the URL-compressed `SwipeToolUrlState` format — both carry the same information under different key names.
+
+| property                          | URL-compressed equivalent | type                                            | description                                                                                                           |
+| --------------------------------- | ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| splitPosition                     | sp                        | number&vert;undefined                           | Position between 0 and 1 to place the split at. If omitted, the current position is kept.                             |
+| swipeLayerStates                  | swl                       | Object<string,SwipeLayerState> &vert; undefined | Layer states to apply before activation. Uses numeric `SplitDirection` values (`-1` = left, `0` = none, `1` = right). |
+| swipeLayerStates[].active         | swl[].a                   | boolean                                         | Whether the layer is active.                                                                                          |
+| swipeLayerStates[].splitDirection | swl[].sd                  | number                                          | The split direction of the layer as a numeric `SplitDirection` value.                                                 |
+
+```json
+{
+  "type": "ActivateSwipeToolCallback",
+  "splitPosition": 0.3,
+  "swipeLayerStates": {
+    "Openstreetmap OSM Cache": {
+      "active": true,
+      "splitDirection": -1
+    }
+  }
+}
+```
+
+The URL-compressed format uses shortened keys and is equivalent:
+
+```json
+{
+  "type": "ActivateSwipeToolCallback",
+  "sp": 0.3,
+  "swl": {
+    "Openstreetmap OSM Cache": {
+      "a": true,
+      "sd": -1
+    }
+  }
+}
+```
+
+### DeactivateSwipeToolCallback
+
+Deactivates the swipe tool, restoring the original layer states from before activation.
+
+```json
+{
+  "type": "DeactivateSwipeToolCallback"
+}
+```

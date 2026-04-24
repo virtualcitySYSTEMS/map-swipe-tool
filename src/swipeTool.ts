@@ -255,8 +255,7 @@ export default class SwipeTool {
       if (this._app.windowManager.has(swipeWindowId)) {
         this._app.windowManager.remove(swipeWindowId);
       }
-      const state = this.getState();
-      this.setState(state);
+      this._cachedState = this.getState();
       this.applyState(this._initialState);
       this._clearSwipeTree();
       this._active = false;
@@ -391,32 +390,20 @@ export default class SwipeTool {
   }
 
   /**
-   * Iterates over content tree collection and returns current SwipeLayerState
-   * for all layers of LayerContentTreeItem and LayerGroupContentTreeItem.
+   * Iterates over layer collection and returns current SwipeLayerState.
    */
   getState(): Record<string, SwipeLayerState> {
-    const layerStates = [...this._app.contentTree]
-      .map((item) => {
-        const options = item.toJSON();
-        if ((options as LayerContentTreeItemOptions).layerName) {
-          return [(options as LayerContentTreeItemOptions).layerName];
-        } else if ((options as LayerGroupContentTreeItemOptions).layerNames) {
-          return (options as LayerGroupContentTreeItemOptions).layerNames;
+    const layerStates = [...this._app.layers]
+      .map((layer: Layer) => {
+        if ('splitDirection' in layer && layer.splitDirection !== undefined) {
+          return [
+            layer.name,
+            { active: layer.active, splitDirection: layer.splitDirection },
+          ];
         }
-        return [];
+        return null;
       })
-      .flat()
-      .filter(
-        (layerName) =>
-          (this._app.layers.getByKey(layerName) as SplitableLayer)
-            ?.splitDirection !== undefined,
-      )
-      .map((name) => {
-        const { active, splitDirection } = this._app.layers.getByKey(
-          name,
-        ) as SplitableLayer;
-        return [name, { active, splitDirection }];
-      });
+      .filter((entry) => !!entry);
     return Object.fromEntries(layerStates) as Record<string, SwipeLayerState>;
   }
 

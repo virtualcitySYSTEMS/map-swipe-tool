@@ -1,5 +1,8 @@
 import type { PluginConfigEditor, VcsPlugin, VcsUiApp } from '@vcmap/ui';
+import { moduleIdSymbol } from '@vcmap/core';
 import SwipeTool, { type SwipeLayerState } from './swipeTool.js';
+import ActivateSwipeToolCallback from './callback/activateSwipeToolCallback.js';
+import DeactivateSwipeToolCallback from './callback/deactivateSwipeToolCallback.js';
 import {
   parseUrlPluginState,
   writeUrlPluginState,
@@ -89,6 +92,16 @@ export default function plugin(config: SwipeToolConfig): SwipeToolPlugin {
       if (!swipeTool) {
         swipeTool = new SwipeTool(app, config);
       }
+      app.callbackClassRegistry.registerClass(
+        this[moduleIdSymbol],
+        ActivateSwipeToolCallback.className,
+        ActivateSwipeToolCallback,
+      );
+      app.callbackClassRegistry.registerClass(
+        this[moduleIdSymbol],
+        DeactivateSwipeToolCallback.className,
+        DeactivateSwipeToolCallback,
+      );
       const pluginState = parseUrlPluginState(state);
       if (pluginState?.splitPosition) {
         swipeTool.splitPosition = pluginState.splitPosition;
@@ -218,6 +231,16 @@ export default function plugin(config: SwipeToolConfig): SwipeToolPlugin {
       },
     },
     destroy(): void {
+      if (app) {
+        app.callbackClassRegistry.unregisterClass(
+          this[moduleIdSymbol],
+          ActivateSwipeToolCallback.className,
+        );
+        app.callbackClassRegistry.unregisterClass(
+          this[moduleIdSymbol],
+          DeactivateSwipeToolCallback.className,
+        );
+      }
       if (swipeTool) {
         swipeTool.destroy();
         swipeTool = undefined;
